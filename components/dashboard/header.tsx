@@ -36,9 +36,6 @@ const Header: React.FC<HeaderProps> = ({ onMenuPress, logoSource }) => {
         <View style={styles.headerRight}>
           <TouchableOpacity style={styles.iconButton}>
             <Bell stroke="#1F2937" width={24} height={24} />
-            <View style={styles.notificationBadge}>
-              <Text style={styles.badgeText}>5</Text>
-            </View>
           </TouchableOpacity>
         </View>
       </View>
@@ -73,8 +70,8 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   headerLogo: {
-    width: 140,
-    height: 40,
+    width: 200,
+    height: 60,
   },
   headerTitle: {
     fontSize: 20,

@@ -15,6 +15,7 @@ import NotificationScreen from './pages/notification-screen';
 // import AdvertisementsScreen from './pages/AdvertisementsScreen';
 // import HelpScreen from './pages/HelpScreen';
 import { AuthProvider, useAuth } from './context/auth-context';
+import AdvertisementScreen from './pages/advertisement-screen';
 
 type RootStackParamList = {
   Splash: undefined;
@@ -40,12 +41,12 @@ const DashboardStackNavigator = () => {
     <DashboardStack.Navigator screenOptions={{ headerShown: false }}>
       <DashboardStack.Screen name="DashboardMain" component={DashboardScreen} />
       <DashboardStack.Screen name="Notifications" component={NotificationScreen} />
-      {/* <DashboardStack.Screen name="Birthdays" component={BirthdaysScreen} /> */}
+      {/* <DashboardStack.Screen name="Birthdays" component={BirthdayScreen} /> */}
       {/* <DashboardStack.Screen name="Anniversaries" component={AnniversariesScreen} /> */}
       {/* <DashboardStack.Screen name="Videos" component={VideosScreen} /> */}
       {/* <DashboardStack.Screen name="Events" component={EventsScreen} /> */}
       {/* <DashboardStack.Screen name="Profile" component={ProfileScreen} /> */}
-      {/* <DashboardStack.Screen name="Advertisements" component={AdvertisementsScreen} /> */}
+      <DashboardStack.Screen name="Advertisements" component={AdvertisementScreen} />
       {/* <DashboardStack.Screen name="Help" component={HelpScreen} /> */}
     </DashboardStack.Navigator>
   );
@@ -120,7 +121,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <AuthProvider 
+    <AuthProvider
       onLoginSuccess={handleLoginSuccess}
       onRegistrationRequired={handleRegistrationRequired}
     >

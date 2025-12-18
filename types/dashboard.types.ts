@@ -12,7 +12,7 @@ export type MenuItem = {
 export type GridItem = {
   id: string;
   title: string;
-  subtitle: string;
+  subtitle?: string;
   icon: ComponentType<any>;
   gradient: string;
   screen: string;
@@ -20,11 +20,11 @@ export type GridItem = {
 };
 
 export type Advertisement = {
-  id: string;
-  title: string;
-  description: string;
   image: string;
-  gradient: string[];
+  website: string;
+  description: string;
+  result: string;
+  msg: string;
 };
 
 export type Platform = {
@@ -45,3 +45,18 @@ export type Event = {
   icon: ComponentType<any>;
   gradient: string[];
 };
+
+export type BirthDayOrAnniversary = {
+  id: string,
+  full_name: string,
+  name: string,
+  dob: string,
+  city: string,
+  age: string,
+  marriage_date: string,
+  marriage_year: string,
+  mobile: string,
+  image: string,
+  result: string,
+  msg?: string
+}

@@ -92,7 +92,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               style={styles.editButton}
               onPress={onEditProfile}
             >
-              <Edit2 stroke="#ffffffff" width={16} height={16} />
+              <Edit2 stroke="#000000ff" width={16} height={16} />
             </TouchableOpacity>
           </View>
         </View>
@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
   sidebarTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#ffffffff',
+    color: '#1a1919ff',
   },
   profileSection: {
     alignItems: 'center',
@@ -209,12 +209,10 @@ const styles = StyleSheet.create({
   profileName: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#ffffffff',
     marginBottom: 4,
   },
   profileEmail: {
     fontSize: 14,
-    color: '#cad2dfff',
     marginBottom: 15,
   },
   // Edit button styles

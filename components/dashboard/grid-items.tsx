@@ -28,7 +28,6 @@ const GridItem: React.FC<GridItemProps> = ({ item, onPress }) => {
           <Icon stroke="#fff" width={22} height={22} />
         </LinearGradient>
         <Text style={styles.title}>{item.title}</Text>
-        <Text style={styles.subtitle}>{item.subtitle}</Text>
       </View>
     </TouchableOpacity>
   );

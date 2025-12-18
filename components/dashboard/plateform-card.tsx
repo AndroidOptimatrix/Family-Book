@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   platformCard: {
-    borderRadius: 16,
+    borderRadius: 12,
     padding: 4,
     alignItems: 'center',
     shadowColor: '#000',
@@ -70,6 +70,7 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 4,
     minHeight: 20,
+    paddingBlock: 10
   },
   platformIconContainer: {
     width: 40,

@@ -29,7 +29,6 @@ import {
 } from 'react-native-feather';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 
-// Import components
 import Sidebar from '../components/dashboard/sidebar';
 import Header from '../components/dashboard/header';
 import GridItem from '../components/dashboard/grid-items';
@@ -39,6 +38,7 @@ import EventCard from '../components/dashboard/event-card';
 
 import { MenuItem, GridItem as GridItemType, Advertisement, Platform, Event } from '../types/dashboard.types';
 import { useAuth } from '../context/auth-context';
+import useAdvertisement from '../hooks/useAdvertisement';
 
 type DashboardStackParamList = {
   DashboardMain: undefined;
@@ -60,6 +60,7 @@ const PURPLE_50 = 'rgb(250, 245, 255)';
 
 const DashboardScreen: React.FC = () => {
   const { logout } = useAuth();
+  const { advertisements } = useAdvertisement();
   const navigation = useNavigation<NavigationProp<DashboardStackParamList>>();
   const [refreshing, setRefreshing] = useState(false);
   const [sidebarVisible, setSidebarVisible] = useState(false);
@@ -123,16 +124,14 @@ const DashboardScreen: React.FC = () => {
     {
       id: '1',
       title: 'Notification',
-      subtitle: '5 new alerts',
       icon: Bell,
-      gradient: GREEN_50,
+      gradient: BLUE_50,
       screen: 'Notifications',
-      icon_bg: ['#67ffb0ff', '#00772eff']
+      icon_bg: ['#accdffff', '#0048e4ff']
     },
     {
       id: '2',
       title: 'Birthday',
-      subtitle: '2 upcoming',
       icon: Calendar,
       gradient: BLUE_50,
       screen: 'Birthdays',
@@ -141,34 +140,30 @@ const DashboardScreen: React.FC = () => {
     {
       id: '3',
       title: 'Anniversary',
-      subtitle: '3 celebrations',
       icon: Heart,
-      gradient: PURPLE_50,
+      gradient: BLUE_50,
       screen: 'Anniversaries',
-      icon_bg: ['#eaccffff', '#5300acff']
+      icon_bg: ['#accdffff', '#0048e4ff']
     },
     {
       id: '4',
       title: 'Video',
-      subtitle: 'Watch videos',
       icon: VideoIcon,
-      gradient: GREEN_50,
+      gradient: PURPLE_50,
       screen: 'Videos',
-      icon_bg: ['#67ffb0ff', '#00772eff']
+      icon_bg: ['#eaccffff', '#5300acff']
     },
     {
       id: '5',
       title: 'Events',
-      subtitle: '3 events',
       icon: Users,
-      gradient: BLUE_50,
+      gradient: PURPLE_50,
       screen: 'Events',
-      icon_bg: ['#accdffff', '#0048e4ff']
+      icon_bg: ['#eaccffff', '#5300acff']
     },
     {
       id: '6',
       title: 'My Profile',
-      subtitle: 'View and edit',
       icon: User,
       gradient: PURPLE_50,
       screen: 'Profile',
@@ -176,31 +171,16 @@ const DashboardScreen: React.FC = () => {
     },
   ];
 
-  const advertisements: Advertisement[] = [
-    {
-      id: '1',
-      title: 'Family Reunion Package',
-      description: 'Plan your perfect family reunion with our special package',
-      image: 'https://images.unsplash.com/photo-1511988617509-a57c8a288659?w=400&h=200&fit=crop',
-      gradient: ['#6366F1', '#8B5CF6'],
-    },
-    {
-      id: '2',
-      title: 'Premium Membership',
-      description: 'Unlock exclusive features for your family',
-      image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=200&fit=crop',
-      gradient: ['#EC4899', '#BE185D'],
-    },
+  const followPlatforms: Platform[] = [
     {
       id: '3',
-      title: 'Family Photos Offer',
-      description: 'Get professional family photos at 30% off',
-      image: 'https://images.unsplash.com/photo-1609220136736-443140cffec6?w=500&auto=format&fit=crop&q=60',
-      gradient: ['#10B981', '#059669'],
+      name: 'YouTube',
+      icon: Youtube,
+      handle: 'Family Book',
+      followers: '9K+ subscribers',
+      url: 'https://youtube.com/c/FamilyBookChannel',
+      gradient: ['#FF0000', '#CC0000'],
     },
-  ];
-
-  const followPlatforms: Platform[] = [
     {
       id: '1',
       name: 'Facebook',
@@ -219,15 +199,7 @@ const DashboardScreen: React.FC = () => {
       url: 'https://instagram.com/familybook',
       gradient: ['#E4405F', '#C13584'],
     },
-    {
-      id: '3',
-      name: 'YouTube',
-      icon: Youtube,
-      handle: 'Family Book',
-      followers: '9K+ subscribers',
-      url: 'https://youtube.com/c/FamilyBookChannel',
-      gradient: ['#FF0000', '#CC0000'],
-    },
+
   ];
 
   const events: Event[] = [
@@ -400,7 +372,7 @@ const DashboardScreen: React.FC = () => {
           {/* Events Section */}
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Upcoming Events</Text>
+              <Text style={styles.sectionTitle}>Today's Celebration</Text>
               <TouchableOpacity onPress={() => navigation.navigate('Events')}>
                 <Text style={styles.seeAllText}>View Calendar</Text>
               </TouchableOpacity>
