@@ -1,4 +1,3 @@
-// DashboardScreen.tsx
 import React, { useRef, useState } from 'react';
 import {
   View,
@@ -12,7 +11,6 @@ import {
   Animated,
   RefreshControl,
   TouchableWithoutFeedback,
-  Alert,
 } from 'react-native';
 import {
   Bell,
@@ -29,6 +27,7 @@ import {
   User,
   BookOpen
 } from 'react-native-feather';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
 
 // Import components
 import Sidebar from '../components/dashboard/sidebar';
@@ -38,16 +37,30 @@ import AdCarousel from '../components/dashboard/ad-carousel';
 import PlatformCard from '../components/dashboard/plateform-card';
 import EventCard from '../components/dashboard/event-card';
 
-// Import types
 import { MenuItem, GridItem as GridItemType, Advertisement, Platform, Event } from '../types/dashboard.types';
+import { useAuth } from '../context/auth-context';
 
-const { width, height } = Dimensions.get('window');
+type DashboardStackParamList = {
+  DashboardMain: undefined;
+  Notifications: undefined;
+  Birthdays: undefined;
+  Anniversaries: undefined;
+  Videos: undefined;
+  Events: undefined;
+  Profile: undefined;
+  Advertisements: undefined;
+  Help: undefined;
+};
+
+const { width } = Dimensions.get('window');
 
 const GREEN_50 = 'rgb(240, 253, 244)';
 const BLUE_50 = 'rgb(239, 246, 255)';
 const PURPLE_50 = 'rgb(250, 245, 255)';
 
 const DashboardScreen: React.FC = () => {
+  const { logout } = useAuth();
+  const navigation = useNavigation<NavigationProp<DashboardStackParamList>>();
   const [refreshing, setRefreshing] = useState(false);
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -104,7 +117,6 @@ const DashboardScreen: React.FC = () => {
       gradient: GREEN_50,
       screen: 'Help',
     },
-    
   ];
 
   const gridItems: GridItemType[] = [
@@ -159,7 +171,7 @@ const DashboardScreen: React.FC = () => {
       subtitle: 'View and edit',
       icon: User,
       gradient: PURPLE_50,
-      screen: 'profile',
+      screen: 'Profile',
       icon_bg: ['#eaccffff', '#5300acff']
     },
   ];
@@ -259,37 +271,23 @@ const DashboardScreen: React.FC = () => {
 
   const handleMenuItemPress = (item: MenuItem) => {
     closeSidebar();
-    Alert.alert(
-      'Navigation',
-      `Navigate to ${item.title} screen`,
-      [{ text: 'OK', onPress: () => console.log(`Navigate to ${item.screen}`) }]
-    );
+    // Navigate to the screen
+    navigation.navigate(item.screen as keyof DashboardStackParamList);
   };
 
-  const handleLogout = () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: () => {
-            closeSidebar();
-            Alert.alert('Logged out', 'You have been logged out successfully');
-          }
-        }
-      ]
-    );
+  const handleLogout = async () => {
+    closeSidebar();
+    try {
+      await logout();
+      // Navigation back to login will be handled by App.tsx based on auth state
+    } catch (error: any) {
+      console.error('Logout error:', error);
+    }
   };
 
   const handleGridItemPress = (item: GridItemType) => {
-    Alert.alert(
-      'Navigation',
-      `Navigate to ${item.title}`,
-      [{ text: 'OK', onPress: () => console.log(`Navigate to ${item.screen}`) }]
-    );
+    // Navigate to the screen
+    navigation.navigate(item.screen as keyof DashboardStackParamList);
   };
 
   const Backdrop = () => (
@@ -332,7 +330,7 @@ const DashboardScreen: React.FC = () => {
         menuItems={sidebarMenuItems}
         onEditProfile={() => {
           closeSidebar();
-          Alert.alert('Edit Profile', 'Navigate to Edit Profile screen');
+          navigation.navigate('Profile');
         }}
       />
 
@@ -379,7 +377,7 @@ const DashboardScreen: React.FC = () => {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Advertisement</Text>
-              <TouchableOpacity>
+              <TouchableOpacity onPress={() => navigation.navigate('Advertisements')}>
                 <Text style={styles.seeAllText}>View All</Text>
               </TouchableOpacity>
             </View>
@@ -403,7 +401,7 @@ const DashboardScreen: React.FC = () => {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Upcoming Events</Text>
-              <TouchableOpacity>
+              <TouchableOpacity onPress={() => navigation.navigate('Events')}>
                 <Text style={styles.seeAllText}>View Calendar</Text>
               </TouchableOpacity>
             </View>

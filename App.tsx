@@ -1,48 +1,89 @@
+// App.tsx
 import React, { useEffect, useState } from 'react';
-import { StatusBar, Alert } from 'react-native';
+import { StatusBar } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from './pages/login-screen';
-import RegisterScreen from './pages/registration-screen';
-import OTPScreen from './pages/otp-screen';
 import SplashScreen from './pages/splash-screen';
-import DashboardScreen from './pages/dashboard-screen'; // Import Dashboard
-import { AuthProvider } from './context/auth-context';
+import DashboardScreen from './pages/dashboard-screen';
+import NotificationScreen from './pages/notification-screen';
+// import BirthdaysScreen from './pages/BirthdaysScreen';
+// import AnniversariesScreen from './pages/AnniversariesScreen';
+// import VideosScreen from './pages/VideosScreen';
+// import EventsScreen from './pages/EventsScreen';
+// import ProfileScreen from './pages/ProfileScreen';
+// import AdvertisementsScreen from './pages/AdvertisementsScreen';
+// import HelpScreen from './pages/HelpScreen';
+import { AuthProvider, useAuth } from './context/auth-context';
 
-type ScreenType = 'login' | 'register' | 'otp' | 'dashboard';
+type RootStackParamList = {
+  Splash: undefined;
+  Login: undefined;
+  Dashboard: undefined;
+  Notifications: undefined;
+  Birthdays: undefined;
+  Anniversaries: undefined;
+  Videos: undefined;
+  Events: undefined;
+  Profile: undefined;
+  Advertisements: undefined;
+  Help: undefined;
+};
 
-const App: React.FC = () => {
-  const [loading, setLoading] = useState<boolean>(true);
-  const [currentScreen, setCurrentScreen] = useState<ScreenType>('login');
-  const [email, setEmail] = useState<string>('');
-  const [phone, setPhone] = useState<string>('');
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
+// Create Dashboard Stack Navigator for nested screens
+const DashboardStack = createNativeStackNavigator();
+
+const DashboardStackNavigator = () => {
+  return (
+    <DashboardStack.Navigator screenOptions={{ headerShown: false }}>
+      <DashboardStack.Screen name="DashboardMain" component={DashboardScreen} />
+      <DashboardStack.Screen name="Notifications" component={NotificationScreen} />
+      {/* <DashboardStack.Screen name="Birthdays" component={BirthdaysScreen} /> */}
+      {/* <DashboardStack.Screen name="Anniversaries" component={AnniversariesScreen} /> */}
+      {/* <DashboardStack.Screen name="Videos" component={VideosScreen} /> */}
+      {/* <DashboardStack.Screen name="Events" component={EventsScreen} /> */}
+      {/* <DashboardStack.Screen name="Profile" component={ProfileScreen} /> */}
+      {/* <DashboardStack.Screen name="Advertisements" component={AdvertisementsScreen} /> */}
+      {/* <DashboardStack.Screen name="Help" component={HelpScreen} /> */}
+    </DashboardStack.Navigator>
+  );
+};
+
+// Inner component that uses auth context
+const AppContent: React.FC = () => {
+  const { isAuthenticated, isLoading, requiresRegistration } = useAuth();
+  const [splashVisible, setSplashVisible] = useState<boolean>(true);
+  const [minSplashTime, setMinSplashTime] = useState<boolean>(false);
+
+  // Show splash for minimum 2 seconds for better UX
   useEffect(() => {
-    // Simulate loading (replace with your actual loading logic)
     const timer = setTimeout(() => {
-      setLoading(false);
-    }, 3000); // Reduced to 3 seconds for better UX
-
+      setMinSplashTime(true);
+    }, 2000);
     return () => clearTimeout(timer);
   }, []);
 
-  // Check if user is already logged in (you can implement proper auth check here)
+  // Hide splash when auth check is done and minimum time has passed
   useEffect(() => {
-    const checkAuth = async () => {
-      // Add your actual authentication check logic here
-      // For example: check AsyncStorage for auth token
-      // const token = await AsyncStorage.getItem('authToken');
-      // if (token) {
-      //   setIsAuthenticated(true);
-      //   setCurrentScreen('dashboard');
-      // }
-    };
-    checkAuth();
-  }, []);
+    if (!isLoading && minSplashTime) {
+      setSplashVisible(false);
+    }
+  }, [isLoading, minSplashTime]);
 
-  if (loading) {
+  const handleLoginSuccess = () => {
+    // Login success is handled by auth context
+  };
+
+  if (splashVisible) {
     return (
       <SplashScreen
-        onAnimationComplete={() => setLoading(false)}
+        onAnimationComplete={() => {
+          if (!isLoading && minSplashTime) {
+            setSplashVisible(false);
+          }
+        }}
         logoSource={require('./logo-2.png')}
         appName="Family Book"
         tagline="Connecting Families"
@@ -50,61 +91,41 @@ const App: React.FC = () => {
     );
   }
 
-  const handleLoginSuccess = () => {
-    setIsAuthenticated(true);
-    setCurrentScreen('dashboard');
-    Alert.alert('Success', 'Welcome to Family Book!');
+  return (
+    <NavigationContainer>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        {!isAuthenticated || requiresRegistration ? (
+          <Stack.Screen name="Login">
+            {() => <LoginScreen onLoginSuccess={handleLoginSuccess} />}
+          </Stack.Screen>
+        ) : (
+          <>
+            <Stack.Screen name="Dashboard" component={DashboardStackNavigator} />
+            {/* You can also add these screens directly in the root stack if needed */}
+          </>
+        )}
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+};
+
+// Main App component with AuthProvider
+const App: React.FC = () => {
+  const handleLoginSuccess = (userInfo: any) => {
+    console.log('✅ User logged in:', userInfo);
   };
 
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    setCurrentScreen('login');
-    Alert.alert('Logged Out', 'You have been logged out successfully.');
-  };
-
-  const renderScreen = () => {
-    switch (currentScreen) {
-      case 'register':
-        return (
-          <RegisterScreen
-            onBack={() => setCurrentScreen('login')}
-            onRegisterSuccess={(phone: string) => {
-              setPhone(phone);
-              setCurrentScreen('otp');
-            }}
-          />
-        );
-      case 'otp':
-        return (
-          <OTPScreen
-            email={email}
-            phone={phone}
-            onBack={() => setCurrentScreen('register')}
-            onVerifySuccess={() => {
-              setIsAuthenticated(true);
-              setCurrentScreen('dashboard');
-              Alert.alert('Success', 'Account verified successfully! Welcome to Family Book.');
-            }}
-          />
-        );
-      case 'dashboard':
-        return (
-          <DashboardScreen />
-        );
-      default:
-        return (
-          <LoginScreen
-            onLoginSuccess={handleLoginSuccess}
-            onNavigateToRegister={() => setCurrentScreen('register')}
-          />
-        );
-    }
+  const handleRegistrationRequired = (phoneNumber: string) => {
+    console.log('📝 Registration required for phone:', phoneNumber);
   };
 
   return (
-    <AuthProvider>
+    <AuthProvider 
+      onLoginSuccess={handleLoginSuccess}
+      onRegistrationRequired={handleRegistrationRequired}
+    >
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-      {renderScreen()}
+      <AppContent />
     </AuthProvider>
   );
 };
