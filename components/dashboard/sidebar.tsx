@@ -11,6 +11,7 @@ import { ChevronLeft, ChevronRight, LogOut, Edit2 } from 'react-native-feather';
 import { MenuItem } from '../../types/dashboard.types';
 import LinearGradient from 'react-native-linear-gradient';
 import { AppThemeGradient } from '../../config/config';
+import { useAuth } from '../../context/auth-context';
 
 interface SidebarProps {
   sidebarAnim: Animated.Value;
@@ -29,6 +30,32 @@ const Sidebar: React.FC<SidebarProps> = ({
   menuItems,
   onEditProfile,
 }) => {
+  const { userInfo, userPhone } = useAuth();
+
+  // Format phone number for display
+  const formatPhoneNumber = (phone: string | null | undefined): string => {
+    if (!phone) return 'N/A';
+    
+    // Remove any non-digit characters
+    let cleanPhone = phone.replace(/\D/g, '');
+    
+    // Remove country code if present (e.g., "918141561118" -> "8141561118")
+    if (cleanPhone.length > 10 && cleanPhone.startsWith('91')) {
+      cleanPhone = cleanPhone.substring(2);
+    }
+    
+    // Format the phone number (e.g., "8141561118" -> "81415 61118")
+    if (cleanPhone.length === 10) {
+      return `+91 ${cleanPhone.substring(0, 5)} ${cleanPhone.substring(5)}`;
+    }
+    
+    return `+91 ${cleanPhone}`;
+  };
+
+  // Get user name from userInfo
+  const userName = userInfo?.user_name || userInfo?.name || 'User';
+  const phoneNumber = formatPhoneNumber(userInfo?.mobile || userPhone);
+
   return (
     <Animated.View
       style={[
@@ -52,8 +79,12 @@ const Sidebar: React.FC<SidebarProps> = ({
           {/* Add this container for name and edit button */}
           <View style={styles.nameAndEditContainer}>
             <View style={styles.profileInfo}>
-              <Text style={styles.profileName}>John Doe</Text>
-              <Text style={styles.profileEmail}>+91 81415 61116</Text>
+              <Text style={styles.profileName} numberOfLines={1} ellipsizeMode="tail">
+                {userName.trim() || 'User'}
+              </Text>
+              <Text style={styles.profileEmail} numberOfLines={1}>
+                {phoneNumber}
+              </Text>
             </View>
 
             {/* Edit Button */}

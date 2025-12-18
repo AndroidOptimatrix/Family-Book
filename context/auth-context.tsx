@@ -17,6 +17,7 @@ interface AuthContextType {
     isLoading: boolean;
     requiresRegistration: boolean;
     userInfo: UserInfo | null;
+    userPhone: string | null;
     sendOtp: (mobile: string) => Promise<ApiResponse>;
     verifyOtp: (mobile: string, otp: string) => Promise<ApiResponse>;
     completeProfile: (name: string) => Promise<ApiResponse>;
@@ -77,9 +78,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
                     }
 
                     // If model_open is true, user needs to complete registration
-                    if (modelOpen === true) {
+                    // Handle both boolean true and string "true" from storage
+                    const needsRegistration = modelOpen === true || modelOpen === "true";
+                    if (needsRegistration) {
                         setRequiresRegistration(true);
-                    } else if (modelOpen === false) {
+                        if (storedUserInfo) {
+                            const parsedInfo = typeof storedUserInfo === 'string'
+                                ? JSON.parse(storedUserInfo)
+                                : storedUserInfo;
+                            if (parsedInfo.phone) {
+                                setUserPhone(parsedInfo.phone);
+                            }
+                        }
+                    } else if (modelOpen === false || modelOpen === "false") {
                         // User is already registered, perform background login
                         await performBackgroundLogin();
                     }
@@ -115,7 +126,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
             const params = {
                 type: 'login_otp',
                 user_id: parsedInfo.user_id || parsedInfo.id,
-                otp: parsedInfo.otp, // This should be stored securely
+                otp_code: parsedInfo.otp, // API expects otp_code parameter
             };
 
             const data = await makeApiCall('', params);
@@ -136,7 +147,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     const sendOtp = async (mobile: string): Promise<ApiResponse> => {
         try {
             setIsLoading(true);
-            setUserPhone(mobile);
 
             // Validate mobile number
             const mobileRegex = /^[6-9]\d{9}$/;
@@ -162,12 +172,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
             const firstItem = data.DATA[0];
             console.log('✅ First item in DATA:', firstItem);
 
-            // Save user_id for OTP verification
+            // Save user_id for OTP verification and store register flag in storage
+            // IMPORTANT: DO NOT set requiresRegistration or userPhone here
+            // The modal should only open AFTER OTP verification, not after sending OTP
             if (firstItem.user_id) {
                 setUserId(firstItem.user_id.toString());
-                await storage.setItem('@model_open', firstItem.register === true);
+                const isRegister = firstItem.register === true;
+                await storage.setItem('@model_open', isRegister);
                 console.log('👤 User ID saved:', firstItem.user_id);
+                console.log('📝 Register flag stored in storage:', isRegister, '(modal will open after OTP verification if true)');
             }
+
+            // Ensure requiresRegistration is false at this point - modal should not open yet
+            setRequiresRegistration(false);
 
             // Check if successful
             if (firstItem.result === 'success') {
@@ -236,11 +253,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
 
                     setIsAuthenticated(true);
 
-                    // Check if user needs to complete registration
-                    if (modelOpen === true) {
-                        console.log('📝 User needs to complete registration');
-                        setRequiresRegistration(true);
-                        setUserPhone(mobile);
+                    // NOW check if user needs to complete registration (after OTP verification)
+                    // This is when the modal should open, NOT after sending OTP
+                    // Handle both boolean true and string "true" from storage
+                    const needsRegistration = modelOpen === true || modelOpen === "true";
+                    if (needsRegistration) {
+                        console.log('📝 User needs to complete registration - opening modal now');
+                        setUserPhone(mobile); // Set phone number for modal display
+                        setRequiresRegistration(true); // This will trigger the modal to open
 
                         // IMPORTANT: Call the callback to notify parent component
                         if (onRegistrationRequired) {
@@ -249,7 +269,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
                         }
                     } else {
                         console.log('✅ User is already registered, performing login...');
-                        // User is already registered, perform login
+                        // User is already registered, perform login directly (no modal needed)
                         await performLoginAfterOtp(userId, otp);
                     }
 
@@ -278,7 +298,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
             const params = {
                 type: 'login_otp',
                 user_id: userId,
-                otp: otp,
+                otp_code: otp, // API expects otp_code parameter
             };
 
             const data = await makeApiCall('', params);
@@ -313,6 +333,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     };
 
     // Complete profile function
+    // Flow: 1. Send complete_registration request 2. Then perform background login_otp
     const completeProfile = async (name: string): Promise<ApiResponse> => {
         try {
             setIsLoading(true);
@@ -321,11 +342,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
                 throw new Error('Invalid User ID. Please try again.');
             }
 
-            console.log('📝 Completing profile for user_id:', userId, 'with name:', name, 'userphone', userPhone);
+            console.log('📝 Step 1: Completing profile for user_id:', userId, 'with name:', name);
 
+            // Extract just the mobile number without country code for API
+            let mobileNumber = userPhone || '';
+            if (mobileNumber) {
+                // Remove any non-digit characters
+                mobileNumber = mobileNumber.replace(/\D/g, '');
+                // Remove country code if present (e.g., "918141561118" -> "8141561118")
+                // Assuming country code is 2 digits (91 for India)
+                if (mobileNumber.length > 10 && mobileNumber.startsWith('91')) {
+                    mobileNumber = mobileNumber.substring(2);
+                }
+            }
+
+            // Step 1: Send complete_registration request
             const params = {
                 type: 'complete_registration',
-                mobile: userPhone || '',
+                mobile: mobileNumber,
                 name: name,
             };
 
@@ -338,7 +372,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
                 if (firstItem.result === 'success') {
                     console.log('🎉 Profile completed successfully');
 
-                    // Now perform login after profile completion
+                    // Step 2: Now perform background login after profile completion
                     await performLoginAfterProfile(userId);
 
                     return data;
@@ -357,7 +391,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         }
     };
 
-    // Perform login after profile completion
+    // Perform background login after profile completion
+    // This is Step 2: Send login_otp request in background
     const performLoginAfterProfile = async (userId: string): Promise<void> => {
         try {
             // Get stored OTP from user info
@@ -370,12 +405,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
                 ? JSON.parse(storedUserInfo)
                 : storedUserInfo;
 
-            console.log('🔄 Performing login after profile completion...');
+            console.log('🔄 Step 2: Performing background login after profile completion...');
 
             const params = {
                 type: 'login_otp',
                 user_id: userId,
-                otp: parsedInfo.otp,
+                otp_code: parsedInfo.otp, // API expects otp_code parameter
             };
 
             const data = await makeApiCall('', params);
@@ -441,6 +476,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         isLoading,
         requiresRegistration,
         userInfo,
+        userPhone,
         sendOtp,
         verifyOtp,
         completeProfile,

@@ -34,7 +34,7 @@ interface LoginScreenProps {
 const LoginScreen: React.FC<LoginScreenProps> = ({
   onLoginSuccess
 }) => {
-  const { isLoading, requiresRegistration, completeProfile } = useAuth();
+  const { isLoading, requiresRegistration, completeProfile, userPhone } = useAuth();
   
   const [countryCode, setCountryCode] = useState<'IN' | 'US' | string>('IN');
   const [countryCallingCode, setCountryCallingCode] = useState('91');
@@ -53,10 +53,13 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
 
   // Show name modal when registration is required
   useEffect(() => {
-    if (requiresRegistration) {
+    if (requiresRegistration && userPhone) {
+      console.log('🎯 Opening name collection modal. Phone:', userPhone);
       setShowNameModal(true);
+    } else if (!requiresRegistration) {
+      setShowNameModal(false);
     }
-  }, [requiresRegistration]);
+  }, [requiresRegistration, userPhone]);
 
   // Start countdown timer when OTP is sent
   useEffect(() => {
@@ -111,7 +114,26 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
   };
 
   const getFormattedPhoneForDisplay = () => {
-    const formattedPhone = phoneNumber.replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3');
+    // Use userPhone from auth context if available, otherwise use local phoneNumber
+    const phoneToUse = userPhone || phoneNumber;
+    
+    if (!phoneToUse) {
+      return '';
+    }
+    
+    // Remove any non-digit characters first
+    let cleanPhone = phoneToUse.replace(/\D/g, '');
+    
+    // If phone starts with country code (like 91), remove it to get just the number
+    if (cleanPhone.startsWith(countryCallingCode) && cleanPhone.length > 10) {
+      cleanPhone = cleanPhone.substring(countryCallingCode.length);
+    }
+    
+    // Format the phone number for display (e.g., "8141561118" -> "814 156 1118")
+    const formattedPhone = cleanPhone.length === 10 
+      ? cleanPhone.replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3')
+      : cleanPhone;
+    
     return `+${countryCallingCode} ${formattedPhone}`;
   };
 
