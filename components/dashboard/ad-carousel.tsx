@@ -44,7 +44,7 @@ const AdCarousel: React.FC<AdCarouselProps> = ({ advertisements }) => {
 
   const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: ViewToken[] }) => {
     if (viewableItems[0]?.index !== undefined) {
-      setCurrentIndex(viewableItems[0].index);
+      setCurrentIndex(viewableItems[0].index as number);
     }
   }).current;
 
