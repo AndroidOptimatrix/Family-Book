@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
     View,
     Text,
@@ -21,15 +21,22 @@ import { useNavigation } from '@react-navigation/native';
 const { width } = Dimensions.get('window');
 
 const NotificationScreen: React.FC = () => {
-    const { loading, notifications, error, refetch } = useNotifications();
-    const [refreshing, setRefreshing] = React.useState(false);
+    const { 
+        loading, 
+        loadingMore, 
+        notifications, 
+        error, 
+        hasMore,
+        refreshing,
+        loadMore,
+        refresh 
+    } = useNotifications();
+    
     const navigation = useNavigation();
 
     const onRefresh = React.useCallback(async () => {
-        setRefreshing(true);
-        await refetch();
-        setRefreshing(false);
-    }, [refetch]);
+        await refresh();
+    }, [refresh]);
 
     const formatDate = (dateString: string): string => {
         if (!dateString) return '';
@@ -42,6 +49,12 @@ const NotificationScreen: React.FC = () => {
         return dateString;
     };
 
+    const handleLoadMore = useCallback(() => {
+        if (hasMore && !loadingMore && !loading) {
+            loadMore();
+        }
+    }, [hasMore, loadingMore, loading, loadMore]);
+
     const renderNotificationItem = ({ item }: { item: Notification }) => {
         const hasReaction = item.user_reacted === 'Yes';
         const reactionCount = parseInt(item.total_reaction) || 0;
@@ -53,7 +66,7 @@ const NotificationScreen: React.FC = () => {
                     <Image
                         source={{ uri: item.photo }}
                         style={styles.notificationImage}
-                        resizeMode="cover"
+                        resizeMode="contain"
                     />
                 ) : (
                     <View style={styles.placeholderImage}>
@@ -110,6 +123,17 @@ const NotificationScreen: React.FC = () => {
         );
     };
 
+    const renderFooter = () => {
+        if (!loadingMore) return null;
+        
+        return (
+            <View style={styles.footerLoader}>
+                <ActivityIndicator size="small" color="#3B82F6" />
+                <Text style={styles.loadingMoreText}>Loading more notifications...</Text>
+            </View>
+        );
+    };
+
     const renderEmptyState = () => (
         <View style={styles.emptyContainer}>
             <View style={styles.emptyIconContainer}>
@@ -131,7 +155,7 @@ const NotificationScreen: React.FC = () => {
             <Text style={styles.emptySubtitle}>{error}</Text>
             <TouchableOpacity
                 style={styles.retryButton}
-                onPress={refetch}
+                onPress={refresh}
                 disabled={loading}
             >
                 <Text style={styles.retryButtonText}>Retry</Text>
@@ -159,6 +183,7 @@ const NotificationScreen: React.FC = () => {
                         <Text style={styles.headerTitle}>Notifications</Text>
                         <Text style={styles.headerSubtitle}>
                             {notifications.length} {notifications.length === 1 ? 'notification' : 'notifications'}
+                            {hasMore && !loading && ' • More available'}
                         </Text>
                     </View>
                 </View>
@@ -175,11 +200,12 @@ const NotificationScreen: React.FC = () => {
                 <FlatList
                     data={notifications}
                     renderItem={renderNotificationItem}
-                    keyExtractor={(item) => item.id}
+                    keyExtractor={(item, index) => item.id || `notification-${index}`}
                     contentContainerStyle={
                         notifications.length === 0 ? styles.emptyListContainer : styles.listContainer
                     }
                     ListEmptyComponent={renderEmptyState}
+                    ListFooterComponent={renderFooter}
                     refreshControl={
                         <RefreshControl
                             refreshing={refreshing}
@@ -189,6 +215,8 @@ const NotificationScreen: React.FC = () => {
                         />
                     }
                     showsVerticalScrollIndicator={false}
+                    onEndReached={handleLoadMore}
+                    onEndReachedThreshold={0.3}
                 />
             )}
         </SafeAreaView>
@@ -215,7 +243,8 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         borderBottomLeftRadius: 20,
         borderBottomRightRadius: 20,
-    }, header: {
+    }, 
+    header: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -381,6 +410,17 @@ const styles = StyleSheet.create({
         color: '#FFFFFF',
         fontSize: 16,
         fontWeight: '600',
+    },
+    footerLoader: {
+        padding: 20,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    loadingMoreText: {
+        marginLeft: 10,
+        fontSize: 14,
+        color: '#6B7280',
     },
 });
 
