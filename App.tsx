@@ -16,6 +16,8 @@ import EventsScreen from './pages/events-screen';
 // import HelpScreen from './pages/HelpScreen';
 import { AuthProvider, useAuth } from './context/auth-context';
 import AdvertisementScreen from './pages/advertisement-screen';
+import VideoScreen from './pages/videos-screen';
+import ProfileScreen from './pages/profile-screen';
 
 type RootStackParamList = {
   Splash: undefined;
@@ -44,9 +46,9 @@ const DashboardStackNavigator = () => {
       <DashboardStack.Screen name="Events" component={EventsScreen} />
       {/* <DashboardStack.Screen name="Birthdays" component={BirthdayScreen} /> */}
       {/* <DashboardStack.Screen name="Anniversaries" component={AnniversariesScreen} /> */}
-      {/* <DashboardStack.Screen name="Videos" component={VideosScreen} /> */}
+      <DashboardStack.Screen name="Videos" component={VideoScreen} />
       {/* <DashboardStack.Screen name="Events" component={EventsScreen} /> */}
-      {/* <DashboardStack.Screen name="Profile" component={ProfileScreen} /> */}
+      <DashboardStack.Screen name="Profile" component={ProfileScreen} />
       <DashboardStack.Screen name="Advertisements" component={AdvertisementScreen} />
       {/* <DashboardStack.Screen name="Help" component={HelpScreen} /> */}
     </DashboardStack.Navigator>
