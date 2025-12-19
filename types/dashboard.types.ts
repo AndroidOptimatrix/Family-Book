@@ -1,4 +1,3 @@
-// types.ts
 import { ComponentType } from 'react';
 
 export type MenuItem = {
