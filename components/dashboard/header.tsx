@@ -46,8 +46,8 @@ const Header: React.FC<HeaderProps> = ({ onMenuPress, logoSource }) => {
 const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 16,
+    paddingTop: 10,
+    paddingBottom: 8,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(0, 0, 0, 0.1)',
   },
