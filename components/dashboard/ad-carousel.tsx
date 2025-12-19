@@ -1,5 +1,4 @@
-// AdCarousel.tsx
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -24,8 +23,19 @@ interface AdCarouselProps {
 
 const AdCarousel: React.FC<AdCarouselProps> = ({ advertisements }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isLayoutReady, setIsLayoutReady] = useState(false);
   const scrollX = useRef(new Animated.Value(0)).current;
   const flatListRef = useRef<any>(null);
+
+  // Fix: Add getItemLayout for consistent item positioning
+  const getItemLayout = useCallback(
+    (data: any, index: number) => ({
+      length: CARD_WIDTH + 16, // Width + margin
+      offset: (CARD_WIDTH + 16) * index + 20, // Add initial padding
+      index,
+    }),
+    []
+  );
 
   useEffect(() => {
     if (advertisements.length > 1) {
@@ -52,16 +62,38 @@ const AdCarousel: React.FC<AdCarouselProps> = ({ advertisements }) => {
     itemVisiblePercentThreshold: 50,
   }).current;
 
+  // Fix: Handle layout completion
+  const handleLayout = useCallback(() => {
+    if (advertisements.length > 0 && flatListRef.current && !isLayoutReady) {
+      // Scroll to initial index after layout
+      requestAnimationFrame(() => {
+        flatListRef.current?.scrollToIndex({
+          index: 0,
+          animated: false,
+          viewPosition: 0.5, // Center the item
+        });
+        setIsLayoutReady(true);
+      });
+    }
+  }, [advertisements.length, isLayoutReady]);
+
+  useEffect(() => {
+    setIsLayoutReady(false);
+    if (advertisements.length > 0) {
+      handleLayout();
+    }
+  }, [advertisements]);
+
   const renderItem = ({ item }: { item: Advertisement }) => (
     <View style={styles.adCard}>
-      <Image 
-        source={{ 
+      <Image
+        source={{
           uri: item.image || 'https://images.unsplash.com/photo-1511988617509-a57c8a288659?w=400&h=250&fit=crop'
-        }} 
-        style={styles.adImage} 
+        }}
+        style={styles.adImage}
         resizeMode="contain"
       />
-      
+
       {/* Gradient Overlay */}
       <LinearGradient
         colors={['transparent', 'rgba(0,0,0,0.8)']}
@@ -87,7 +119,7 @@ const AdCarousel: React.FC<AdCarouselProps> = ({ advertisements }) => {
     } else {
       newIndex = currentIndex === advertisements.length - 1 ? 0 : currentIndex + 1;
     }
-    
+
     flatListRef.current?.scrollToIndex({
       index: newIndex,
       animated: true,
@@ -98,9 +130,9 @@ const AdCarousel: React.FC<AdCarouselProps> = ({ advertisements }) => {
   if (advertisements.length === 0) {
     return (
       <View style={[styles.adCard, styles.emptyCard]}>
-        <Image 
-          source={{ uri: 'https://images.unsplash.com/photo-1511988617509-a57c8a288659?w=400&h=250&fit=crop' }} 
-          style={styles.adImage} 
+        <Image
+          source={{ uri: 'https://images.unsplash.com/photo-1511988617509-a57c8a288659?w=400&h=250&fit=crop' }}
+          style={styles.adImage}
           resizeMode="contain"
         />
         <View style={styles.emptyOverlay}>
@@ -113,7 +145,7 @@ const AdCarousel: React.FC<AdCarouselProps> = ({ advertisements }) => {
   return (
     <View style={styles.container}>
       {/* Main Carousel Container */}
-      <View style={styles.carouselContainer}>
+      <View style={styles.carouselContainer} onLayout={handleLayout}>
         {/* Previous Button */}
         {advertisements.length > 1 && (
           <TouchableOpacity
@@ -130,10 +162,11 @@ const AdCarousel: React.FC<AdCarouselProps> = ({ advertisements }) => {
           ref={flatListRef}
           data={advertisements}
           renderItem={renderItem}
-          keyExtractor={(item, index) => item.image || index.toString()}
+          keyExtractor={(item, index) => `${item.image || index.toString()}-${advertisements.length}`}
           horizontal
           showsHorizontalScrollIndicator={false}
           snapToInterval={CARD_WIDTH + 16}
+          snapToAlignment="start" // Changed from default to start
           decelerationRate="fast"
           scrollEventThrottle={16}
           onScroll={Animated.event(
@@ -144,6 +177,11 @@ const AdCarousel: React.FC<AdCarouselProps> = ({ advertisements }) => {
           viewabilityConfig={viewabilityConfig}
           contentContainerStyle={styles.flatListContent}
           initialScrollIndex={0}
+          getItemLayout={getItemLayout} // Added for consistent layout
+          initialNumToRender={advertisements.length} // Render all items initially
+          maxToRenderPerBatch={advertisements.length}
+          windowSize={5}
+          removeClippedSubviews={false} // Disable clipping for initial render
         />
 
         {/* Next Button */}
