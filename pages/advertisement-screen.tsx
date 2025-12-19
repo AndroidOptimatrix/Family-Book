@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     View,
     Text,
@@ -12,19 +12,19 @@ import {
     Dimensions,
     Linking,
 } from 'react-native';
-import { Image as ImageIcon, ExternalLink, ArrowLeft } from 'react-native-feather';
-import LinearGradient from 'react-native-linear-gradient';
-import { AppThemeGradient } from '../config/config';
+import { Image as ImageIcon, ExternalLink, Maximize2 } from 'react-native-feather';
+import LinearHeader from '../components/common/header';
+import ImageViewerModal from '../components/common/image-viewer-modal'; // Import your reusable component
 import useAdvertisement from '../hooks/useAdvertisement';
 import { Advertisement } from '../types/dashboard.types';
-import { useNavigation } from '@react-navigation/native';
 
 const { width } = Dimensions.get('window');
 
 const AdvertisementScreen: React.FC = () => {
     const { loading, advertisements, error, refetch } = useAdvertisement();
-    const [refreshing, setRefreshing] = React.useState(false);
-    const navigation = useNavigation();
+    const [refreshing, setRefreshing] = useState(false);
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [isImageViewerVisible, setIsImageViewerVisible] = useState(false);
 
     const onRefresh = React.useCallback(async () => {
         setRefreshing(true);
@@ -32,6 +32,13 @@ const AdvertisementScreen: React.FC = () => {
         setRefreshing(false);
     }, [refetch]);
 
+    // Handle image press (opens image viewer)
+    const handleImagePress = (imageUri: string) => {
+        setSelectedImage(imageUri);
+        setIsImageViewerVisible(true);
+    };
+
+    // Handle ad card press (opens website)
     const handleAdPress = async (ad: Advertisement) => {
         if (ad.website) {
             try {
@@ -46,17 +53,34 @@ const AdvertisementScreen: React.FC = () => {
         }
     };
 
+    // Close image viewer
+    const closeImageViewer = () => {
+        setIsImageViewerVisible(false);
+        setSelectedImage(null);
+    };
+
     const renderAdvertisementItem = ({ item }: { item: Advertisement }) => (
         <TouchableOpacity
             style={styles.adCard}
             activeOpacity={0.9}
             onPress={() => handleAdPress(item)}
         >
-            <Image
-                source={{ uri: item.image }}
-                style={styles.adImage}
-                resizeMode="contain"
-            />
+            {/* Image with separate press handler */}
+            <TouchableOpacity
+                style={styles.imageTouchable}
+                activeOpacity={0.9}
+                onPress={() => handleImagePress(item.image)}
+            >
+                <Image
+                    source={{ uri: item.image }}
+                    style={styles.adImage}
+                    resizeMode="cover"
+                />
+                <View style={styles.imageOverlay}>
+                    <Maximize2 stroke="#FFFFFF" width={20} height={20} />
+                </View>
+            </TouchableOpacity>
+            
             {item.description && (
                 <View style={styles.adContent}>
                     <Text style={styles.adDescription}>{item.description}</Text>
@@ -102,28 +126,7 @@ const AdvertisementScreen: React.FC = () => {
 
     return (
         <SafeAreaView style={styles.container}>
-            <LinearGradient
-                colors={AppThemeGradient}
-                style={styles.gradientHeader}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-            >
-                <View style={styles.header}>
-                    <TouchableOpacity
-                        style={styles.backButton}
-                        onPress={() => navigation.goBack()}
-                    >
-                        <ArrowLeft stroke="#000" width={24} height={24} />
-                    </TouchableOpacity>
-
-                    <View style={styles.headerContent}>
-                        <Text style={styles.headerTitle}>Advertisements</Text>
-                        <Text style={styles.headerSubtitle}>
-                            {advertisements.length} {advertisements.length === 1 ? 'advertisement' : 'advertisements'}
-                        </Text>
-                    </View>
-                </View>
-            </LinearGradient>
+            <LinearHeader title='Advertisement' subtitle={`${advertisements.length} new advertisements`} />
 
             {loading && !refreshing ? (
                 <View style={styles.loadingContainer}>
@@ -154,6 +157,12 @@ const AdvertisementScreen: React.FC = () => {
                     columnWrapperStyle={styles.row}
                 />
             )}
+
+            <ImageViewerModal
+                isVisible={isImageViewerVisible}
+                imageUri={selectedImage}
+                onClose={closeImageViewer}
+            />
         </SafeAreaView>
     );
 };
@@ -162,46 +171,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#F9FAFB',
-    },
-    gradientHeader: {
-        paddingTop: 20,
-        paddingBottom: 20,
-        paddingHorizontal: 20,
-        borderBottomLeftRadius: 20,
-        borderBottomRightRadius: 20,
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        // marginBottom: 20,
-    },
-    backButton: {
-        padding: 8,
-        backgroundColor: 'rgba(255, 255, 255, 0.2)',
-        borderRadius: 12,
-        width: 40,
-        height: 40,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    headerContent: {
-        flex: 1,
-        alignItems: 'center',
-    },
-    headerTitle: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        color: '#000000',
-        // marginBottom: 4,
-        textShadowColor: 'rgba(0, 0, 0, 0.2)',
-        textShadowOffset: { width: 0, height: 1 },
-        textShadowRadius: 2,
-    },
-    headerSubtitle: {
-        fontSize: 14,
-        color: 'rgba(51, 50, 50, 0.95)',
-        textAlign: 'center',
     },
     loadingContainer: {
         flex: 1,
@@ -234,10 +203,24 @@ const styles = StyleSheet.create({
         elevation: 3,
         overflow: 'hidden',
     },
+    imageTouchable: {
+        position: 'relative',
+    },
     adImage: {
         width: '100%',
         height: 180,
         backgroundColor: '#F3F4F6',
+    },
+    imageOverlay: {
+        position: 'absolute',
+        top: 8,
+        right: 8,
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     adContent: {
         padding: 12,

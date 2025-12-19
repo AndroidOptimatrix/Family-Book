@@ -74,14 +74,14 @@ const DashboardScreen: React.FC = () => {
       title: 'Birthdays',
       icon: Calendar,
       gradient: GREEN_50,
-      screen: 'Birthdays',
+      screen: '',
     },
     {
       id: '2',
       title: 'Anniversaries',
       icon: Heart,
       gradient: BLUE_50,
-      screen: 'Anniversaries',
+      screen: '',
     },
     {
       id: '3',
@@ -116,7 +116,7 @@ const DashboardScreen: React.FC = () => {
       title: 'Help & Support',
       icon: HelpCircle,
       gradient: GREEN_50,
-      screen: 'Help',
+      screen: '',
     },
   ];
 
@@ -134,7 +134,7 @@ const DashboardScreen: React.FC = () => {
       title: 'Birthday',
       icon: Calendar,
       gradient: BLUE_50,
-      screen: 'Birthdays',
+      screen: '',
       icon_bg: ['#accdffff', '#0048e4ff']
     },
     {
@@ -142,7 +142,7 @@ const DashboardScreen: React.FC = () => {
       title: 'Anniversary',
       icon: Heart,
       gradient: BLUE_50,
-      screen: 'Anniversaries',
+      screen: '',
       icon_bg: ['#accdffff', '#0048e4ff']
     },
     {
