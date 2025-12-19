@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState, useRef } from 'react';
 import {
     View,
     Text,
@@ -9,30 +9,37 @@ import {
     TouchableOpacity,
     RefreshControl,
     ActivityIndicator,
-    Dimensions,
+    Animated,
 } from 'react-native';
-import { ArrowLeft, Bell, Calendar, Heart } from 'react-native-feather';
-import LinearGradient from 'react-native-linear-gradient';
-import { AppThemeGradient } from '../config/config';
+import LinearHeader from '../components/common/header';
 import useNotifications from '../hooks/useNotifications';
 import { Notification } from '../types/notification.types';
-import { useNavigation } from '@react-navigation/native';
-
-const { width } = Dimensions.get('window');
+import ImageViewerModal from '../components/common/image-viewer-modal';
+import { Bell, Calendar, Heart, Maximize2 } from 'react-native-feather';
 
 const NotificationScreen: React.FC = () => {
-    const { 
-        loading, 
-        loadingMore, 
-        notifications, 
-        error, 
+    const {
+        loading,
+        loadingMore,
+        notifications,
+        error,
         hasMore,
         refreshing,
         loadMore,
-        refresh 
+        refresh
     } = useNotifications();
-    
-    const navigation = useNavigation();
+
+    // State for image viewer
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [isImageViewerVisible, setIsImageViewerVisible] = useState(false);
+
+    // Animation values
+    const scale = useRef(new Animated.Value(1)).current;
+    const translateX = useRef(new Animated.Value(0)).current;
+    const translateY = useRef(new Animated.Value(0)).current;
+
+    // Track current scale separately
+    const currentScale = useRef(1);
 
     const onRefresh = React.useCallback(async () => {
         await refresh();
@@ -55,6 +62,39 @@ const NotificationScreen: React.FC = () => {
         }
     }, [hasMore, loadingMore, loading, loadMore]);
 
+    // Handle image press
+    const handleImagePress = (imageUri: string) => {
+        setSelectedImage(imageUri);
+        setIsImageViewerVisible(true);
+        resetImageTransforms();
+    };
+
+    // Reset all transforms
+    const resetImageTransforms = () => {
+        Animated.parallel([
+            Animated.spring(scale, {
+                toValue: 1,
+                useNativeDriver: true,
+            }),
+            Animated.spring(translateX, {
+                toValue: 0,
+                useNativeDriver: true,
+            }),
+            Animated.spring(translateY, {
+                toValue: 0,
+                useNativeDriver: true,
+            }),
+        ]).start();
+        currentScale.current = 1;
+    };
+
+    // Close image viewer
+    const closeImageViewer = () => {
+        setIsImageViewerVisible(false);
+        setSelectedImage(null);
+        resetImageTransforms();
+    };
+
     const renderNotificationItem = ({ item }: { item: Notification }) => {
         const hasReaction = item.user_reacted === 'Yes';
         const reactionCount = parseInt(item.total_reaction) || 0;
@@ -63,11 +103,20 @@ const NotificationScreen: React.FC = () => {
             <TouchableOpacity style={styles.notificationCard} activeOpacity={0.9}>
                 {/* Image Section - Center Top */}
                 {item.photo ? (
-                    <Image
-                        source={{ uri: item.photo }}
-                        style={styles.notificationImage}
-                        resizeMode="contain"
-                    />
+                    <TouchableOpacity
+                        activeOpacity={0.9}
+                        onPress={() => handleImagePress(item.photo)}
+                        style={styles.imageTouchable}
+                    >
+                        <Image
+                            source={{ uri: item.photo }}
+                            style={styles.notificationImage}
+                            resizeMode="contain"
+                        />
+                        <View style={styles.imageOverlay}>
+                            <Maximize2 stroke="#FFFFFF" width={24} height={24} />
+                        </View>
+                    </TouchableOpacity>
                 ) : (
                     <View style={styles.placeholderImage}>
                         <Bell stroke="#9CA3AF" width={48} height={48} />
@@ -125,7 +174,7 @@ const NotificationScreen: React.FC = () => {
 
     const renderFooter = () => {
         if (!loadingMore) return null;
-        
+
         return (
             <View style={styles.footerLoader}>
                 <ActivityIndicator size="small" color="#3B82F6" />
@@ -165,29 +214,7 @@ const NotificationScreen: React.FC = () => {
 
     return (
         <SafeAreaView style={styles.container}>
-            <LinearGradient
-                colors={AppThemeGradient}
-                style={styles.gradientHeader}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-            >
-                <View style={styles.header}>
-                    <TouchableOpacity
-                        style={styles.backButton}
-                        onPress={() => navigation.goBack()}
-                    >
-                        <ArrowLeft stroke="#000" width={24} height={24} />
-                    </TouchableOpacity>
-
-                    <View style={styles.headerContent}>
-                        <Text style={styles.headerTitle}>Notifications</Text>
-                        <Text style={styles.headerSubtitle}>
-                            {notifications.length} {notifications.length === 1 ? 'notification' : 'notifications'}
-                            {hasMore && !loading && ' • More available'}
-                        </Text>
-                    </View>
-                </View>
-            </LinearGradient>
+            <LinearHeader title='Notifications' subtitle={`${notifications.length} new notifications`} />
 
             {loading && !refreshing ? (
                 <View style={styles.loadingContainer}>
@@ -219,6 +246,8 @@ const NotificationScreen: React.FC = () => {
                     onEndReachedThreshold={0.3}
                 />
             )}
+
+            <ImageViewerModal imageUri={selectedImage} isVisible={isImageViewerVisible} onClose={closeImageViewer} />
         </SafeAreaView>
     );
 };
@@ -239,16 +268,15 @@ const styles = StyleSheet.create({
     },
     gradientHeader: {
         paddingTop: 20,
-        paddingBottom: 20,
         paddingHorizontal: 20,
         borderBottomLeftRadius: 20,
         borderBottomRightRadius: 20,
-    }, 
+    },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginBottom: 20,
+        marginBottom: 10,
     },
     headerContent: {
         flex: 1,
@@ -295,10 +323,24 @@ const styles = StyleSheet.create({
         elevation: 3,
         overflow: 'hidden',
     },
+    imageTouchable: {
+        position: 'relative',
+    },
     notificationImage: {
         width: '100%',
         height: 200,
         backgroundColor: '#F3F4F6',
+    },
+    imageOverlay: {
+        position: 'absolute',
+        top: 8,
+        right: 8,
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     placeholderImage: {
         width: '100%',
@@ -337,7 +379,7 @@ const styles = StyleSheet.create({
         marginRight: 12,
     },
     deathBadge: {
-        backgroundColor: '#FEE2E2',
+        backgroundColor: '#e4e2feff',
         paddingHorizontal: 8,
         paddingVertical: 4,
         borderRadius: 6,
@@ -351,21 +393,21 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#FEE2E2',
+        backgroundColor: '#e2e4feff',
         paddingVertical: 14,
         paddingHorizontal: 24,
         borderRadius: 12,
         borderWidth: 2,
-        borderColor: '#EF4444',
+        borderColor: '#4447efff',
     },
     likeButtonActive: {
         backgroundColor: '#EF4444',
-        borderColor: '#EF4444',
+        borderColor: '#4447efff',
     },
     likeButtonText: {
         fontSize: 18,
         fontWeight: '700',
-        color: '#EF4444',
+        color: '#4447efff',
         marginLeft: 8,
     },
     likeButtonTextActive: {
