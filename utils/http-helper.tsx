@@ -16,16 +16,11 @@ export const makeApiCall = async (endpoint: string, params: Record<string, strin
                 'Accept': 'application/json',
             },
         });
-
-        console.log('📡 Response status:', response.status);
-        console.log('📡 Response ok:', response.ok);
-
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const responseText = await response.text();
-        console.log('📄 Raw response text:', responseText);
 
         // Try to parse JSON
         let parsedData: ApiResponse;
