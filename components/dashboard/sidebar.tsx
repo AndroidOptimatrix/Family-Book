@@ -36,15 +36,12 @@ const Sidebar: React.FC<SidebarProps> = ({
   const formatPhoneNumber = (phone: string | null | undefined): string => {
     if (!phone) return 'N/A';
     
-    // Remove any non-digit characters
     let cleanPhone = phone.replace(/\D/g, '');
     
-    // Remove country code if present (e.g., "918141561118" -> "8141561118")
     if (cleanPhone.length > 10 && cleanPhone.startsWith('91')) {
       cleanPhone = cleanPhone.substring(2);
     }
     
-    // Format the phone number (e.g., "8141561118" -> "81415 61118")
     if (cleanPhone.length === 10) {
       return `+91 ${cleanPhone.substring(0, 5)} ${cleanPhone.substring(5)}`;
     }

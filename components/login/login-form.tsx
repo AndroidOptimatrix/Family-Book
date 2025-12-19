@@ -36,7 +36,6 @@ const LoginForm: React.FC<LoginFormProps> = ({
     phoneNumber,
     setPhoneNumber,
     countryCallingCode,
-    setCountryCallingCode,
     otpSent,
     setOtpSent,
     otp,
@@ -107,7 +106,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
 
     const handleSendOtp = async () => {
         try {
-            await sendOtp(phoneNumber);
+            await sendOtp(phoneNumber, countryCallingCode);
             setOtpSent(true);
             setResendTimer(30);
             setCanResend(false);
@@ -135,7 +134,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
         if (!canResend) return;
 
         try {
-            await sendOtp(phoneNumber);
+            await sendOtp(phoneNumber, countryCallingCode);
             setResendTimer(30);
             setCanResend(false);
             Alert.alert('Success', 'OTP resent successfully!');
