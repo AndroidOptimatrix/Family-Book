@@ -54,8 +54,6 @@ const useNotifications = () => {
 
             // Check if response has DATA array
             if (!response.DATA || !Array.isArray(response.DATA) || response.DATA.length === 0) {
-                console.log('⚠️ No notifications found or invalid response');
-                
                 if (pageNum === 1) {
                     setNotifications([]);
                 }
@@ -90,11 +88,8 @@ const useNotifications = () => {
                 if (pageNum === 1) {
                     // First page - replace all notifications
                     setNotifications(notificationItems);
-                    console.log(`✅ Loaded ${notificationItems.length} notifications`);
                 } else {
-                    // Subsequent pages - append to existing notifications
                     setNotifications(prev => [...prev, ...notificationItems]);
-                    console.log(`➕ Loaded ${notificationItems.length} more notifications`);
                 }
 
                 // Increment page for next load
