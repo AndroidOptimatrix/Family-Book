@@ -10,7 +10,7 @@ import NotificationScreen from './pages/notification-screen';
 // import BirthdaysScreen from './pages/BirthdaysScreen';
 // import AnniversariesScreen from './pages/AnniversariesScreen';
 // import VideosScreen from './pages/VideosScreen';
-// import EventsScreen from './pages/EventsScreen';
+import EventsScreen from './pages/events-screen';
 // import ProfileScreen from './pages/ProfileScreen';
 // import AdvertisementsScreen from './pages/AdvertisementsScreen';
 // import HelpScreen from './pages/HelpScreen';
@@ -41,6 +41,7 @@ const DashboardStackNavigator = () => {
     <DashboardStack.Navigator screenOptions={{ headerShown: false }}>
       <DashboardStack.Screen name="DashboardMain" component={DashboardScreen} />
       <DashboardStack.Screen name="Notifications" component={NotificationScreen} />
+      <DashboardStack.Screen name="Events" component={EventsScreen} />
       {/* <DashboardStack.Screen name="Birthdays" component={BirthdayScreen} /> */}
       {/* <DashboardStack.Screen name="Anniversaries" component={AnniversariesScreen} /> */}
       {/* <DashboardStack.Screen name="Videos" component={VideosScreen} /> */}
@@ -102,7 +103,6 @@ const AppContent: React.FC = () => {
         ) : (
           <>
             <Stack.Screen name="Dashboard" component={DashboardStackNavigator} />
-            {/* You can also add these screens directly in the root stack if needed */}
           </>
         )}
       </Stack.Navigator>
