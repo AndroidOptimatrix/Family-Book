@@ -1,6 +1,11 @@
-// GridItem.tsx
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableWithoutFeedback,
+  StyleSheet,
+  TouchableOpacity
+} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { GridItem as GridItemType } from '../../types/dashboard.types';
 
@@ -11,23 +16,21 @@ interface GridItemProps {
 
 const GridItem: React.FC<GridItemProps> = ({ item, onPress }) => {
   const Icon = item.icon;
-  
+
   return (
-    <TouchableOpacity 
-      style={[styles.container, { backgroundColor: item.gradient }]} 
-      onPress={onPress}
-      activeOpacity={0.9}
-    >
-      <View style={styles.content}>
-        <LinearGradient
-          style={styles.iconContainer}
-          colors={item.icon_bg}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-        >
-          <Icon stroke="#fff" width={22} height={22} />
-        </LinearGradient>
-        <Text style={styles.title}>{item.title}</Text>
+    <TouchableOpacity onPress={onPress}>
+      <View style={[styles.container, { backgroundColor: item.gradient }]}>
+        <View style={styles.content}>
+          <LinearGradient
+            style={styles.iconContainer}
+            colors={item.icon_bg}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <Icon stroke="#fff" width={22} height={22} />
+          </LinearGradient>
+          <Text style={styles.title}>{item.title}</Text>
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -38,11 +41,10 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 12,
     margin: 4,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
+    elevation: 0, // ← Set to 0
+    shadowOpacity: 0, // ← Set to 0
+    borderWidth: 0.5,
+    borderColor: 'rgba(0, 0, 0, 0.08)',
   },
   content: {
     padding: 12,
@@ -61,10 +63,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#1F2937',
     marginBottom: 2,
-  },
-  subtitle: {
-    fontSize: 10,
-    color: '#4B5563',
+    textAlign: 'center',
   },
 });
 

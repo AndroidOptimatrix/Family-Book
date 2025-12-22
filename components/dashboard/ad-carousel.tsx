@@ -220,9 +220,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3F4F6',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.2,
-    shadowRadius: 15,
-    elevation: 8,
+    elevation: 0, // ← Set to 0
+    shadowOpacity: 0, // ← Set to 0
+    borderWidth: 0.5,
+    borderColor: 'rgba(0, 0, 0, 0.08)',
   },
   adImage: {
     width: '100%',
