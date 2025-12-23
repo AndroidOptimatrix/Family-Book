@@ -19,12 +19,12 @@ const styles = StyleSheet.create({
   },
   termsText: {
     fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: 'rgba(0, 0, 0, 0.8)',
     textAlign: 'center',
     lineHeight: 18,
   },
   linkText: {
-    color: '#FFFFFF',
+    color: '#0400ffff',
     fontWeight: '700',
     textDecorationLine: 'underline',
   },

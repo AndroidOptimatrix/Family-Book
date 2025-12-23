@@ -30,6 +30,7 @@ interface LoginFormProps {
     setCanResend: (can: boolean) => void;
     onPhoneVerified?: (phone: string) => void;
     onRegistrationRequired?: () => void;
+    keyboardVisible?: boolean;
 }
 
 const LoginForm: React.FC<LoginFormProps> = ({
@@ -45,7 +46,8 @@ const LoginForm: React.FC<LoginFormProps> = ({
     canResend,
     setCanResend,
     onPhoneVerified,
-    onRegistrationRequired
+    onRegistrationRequired,
+    keyboardVisible = false
 }) => {
     const { isLoading, sendOtp, verifyOtp } = useAuth();
     const [buttonScale] = useState(new Animated.Value(1));
@@ -161,7 +163,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
     };
 
     return (
-        <View style={styles.formContainer}>
+        <View style={[styles.formContainer, keyboardVisible && styles.containerKeyboardOpen]}>
             {!otpSent ? (
                 <View style={styles.inputGroup}>
                     <Text style={styles.inputLabel}>WhatsApp Number</Text>
@@ -276,11 +278,11 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         padding: 24,
         marginBottom: 24,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 15 },
-        shadowOpacity: 0.15,
         shadowRadius: 25,
-        elevation: 15,
+        zIndex: 50
+    },
+    containerKeyboardOpen: {
+        marginTop: -20,
     },
     inputGroup: {
         marginBottom: 24,
@@ -298,17 +300,15 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         borderWidth: 1.5,
         borderColor: '#E5E7EB',
-        paddingHorizontal: 12,
-        paddingVertical: 12,
+        padding: 10
     },
     countryCodeButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 12,
-        paddingVertical: 8,
         backgroundColor: '#F9FAFB',
         borderRadius: 8,
-        minWidth: 80,
+        minWidth: 40,
+        padding: 4
     },
     countryCodeText: {
         fontSize: 16,
