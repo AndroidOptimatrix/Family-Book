@@ -169,18 +169,6 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({
                     <X stroke="#FFFFFF" width={28} height={28} />
                 </TouchableOpacity>
 
-                {/* Zoom Controls */}
-                <View style={styles.zoomControls}>
-                    <TouchableOpacity style={styles.zoomButton} onPress={handleZoomIn}>
-                        <ZoomIn stroke="#FFFFFF" width={24} height={24} />
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.zoomButton} onPress={handleZoomOut}>
-                        <ZoomOut stroke="#FFFFFF" width={24} height={24} />
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.zoomButton} onPress={resetImageTransforms}>
-                        <Maximize2 stroke="#FFFFFF" width={24} height={24} />
-                    </TouchableOpacity>
-                </View>
 
                 {/* Main Vertical ScrollView */}
                 <ScrollView
@@ -240,18 +228,6 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({
                         </TouchableOpacity>
                     </ScrollView>
                 </ScrollView>
-
-                {/* Instructions */}
-                <View style={styles.instructionsContainer}>
-                    <Text style={styles.instructionsText}>
-                        Double tap to zoom • Use buttons to zoom • Drag to see all parts
-                    </Text>
-                    {zoomScale > 1 && (
-                        <Text style={styles.zoomIndicator}>
-                            Zoom: {zoomScale.toFixed(1)}x
-                        </Text>
-                    )}
-                </View>
             </View>
         </Modal>
     );
@@ -287,7 +263,7 @@ const styles = StyleSheet.create({
     },
     closeButton: {
         position: 'absolute',
-        top: 50,
+        top: 20,
         right: 20,
         width: 50,
         height: 50,

@@ -1,4 +1,3 @@
-// App.tsx
 import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
@@ -7,17 +6,12 @@ import LoginScreen from './pages/login-screen';
 import SplashScreen from './pages/splash-screen';
 import DashboardScreen from './pages/dashboard-screen';
 import NotificationScreen from './pages/notification-screen';
-// import BirthdaysScreen from './pages/BirthdaysScreen';
-// import AnniversariesScreen from './pages/AnniversariesScreen';
-// import VideosScreen from './pages/VideosScreen';
 import EventsScreen from './pages/events-screen';
-// import ProfileScreen from './pages/ProfileScreen';
-// import AdvertisementsScreen from './pages/AdvertisementsScreen';
-// import HelpScreen from './pages/HelpScreen';
 import { AuthProvider, useAuth } from './context/auth-context';
 import AdvertisementScreen from './pages/advertisement-screen';
 import VideoScreen from './pages/videos-screen';
 import ProfileScreen from './pages/profile-screen';
+// import SupportScreen from './pages/support-screen';
 
 type RootStackParamList = {
   Splash: undefined;
@@ -47,10 +41,9 @@ const DashboardStackNavigator = () => {
       {/* <DashboardStack.Screen name="Birthdays" component={BirthdayScreen} /> */}
       {/* <DashboardStack.Screen name="Anniversaries" component={AnniversariesScreen} /> */}
       <DashboardStack.Screen name="Videos" component={VideoScreen} />
-      {/* <DashboardStack.Screen name="Events" component={EventsScreen} /> */}
       <DashboardStack.Screen name="Profile" component={ProfileScreen} />
       <DashboardStack.Screen name="Advertisements" component={AdvertisementScreen} />
-      {/* <DashboardStack.Screen name="Help" component={HelpScreen} /> */}
+      {/* <DashboardStack.Screen name="Support" component={SupportScreen} /> */}
     </DashboardStack.Navigator>
   );
 };

@@ -34,11 +34,9 @@ const CountryPickerWrapper: React.FC<CountryPickerWrapperProps> = ({
       theme={{
         backgroundColor: '#FFFFFF',
         onBackgroundTextColor: '#1F2937',
-        fontSize: 16,
+        fontSize: 14,
         fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto',
-        filterPlaceholderTextColor: '#6B7280',
-        activeOpacity: 0.7,
-        itemHeight: 50,
+        itemHeight: 30,
         flagSize: 24,
       }}
       modalProps={{
