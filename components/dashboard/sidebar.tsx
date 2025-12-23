@@ -63,7 +63,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       <LinearGradient colors={AppThemeGradient} style={[styles.sidebarHeader, { backgroundColor: 'rgb(239, 246, 255)' }]}>
         <View style={styles.sidebarHeaderTop}>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <ChevronLeft stroke="#1F2937" width={24} height={24} />
+            <ChevronLeft stroke="#1F2937" width={16} height={16} />
           </TouchableOpacity>
           <Text style={styles.sidebarTitle}>Menu</Text>
         </View>
@@ -109,7 +109,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               onPress={() => onMenuItemPress(item)}
             >
               <View style={[styles.menuIconContainer, { backgroundColor: 'rgba(255, 255, 255, 0.8)' }]}>
-                <Icon stroke="#1F2937" width={20} height={20} />
+                <Icon stroke="#1F2937" width={18} height={18} />
               </View>
               <Text style={styles.menuItemText}>{item.title}</Text>
               <ChevronRight stroke="#4B5563" width={16} height={16} />
@@ -124,7 +124,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           onPress={onLogout}
         >
           <View style={[styles.menuIconContainer, { backgroundColor: 'rgba(239, 68, 68, 0.2)' }]}>
-            <LogOut stroke="#EF4444" width={20} height={20} />
+            <LogOut stroke="#EF4444" width={18} height={18} />
           </View>
           <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
@@ -153,8 +153,8 @@ const styles = StyleSheet.create({
     elevation: 20,
   },
   sidebarHeader: {
-    paddingTop: 60,
-    paddingBottom: 30,
+    paddingTop: 30,
+    paddingBottom: 20,
     paddingHorizontal: 20,
   },
   sidebarHeaderTop: {
@@ -163,8 +163,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   closeButton: {
-    width: 40,
-    height: 40,
+    width: 30,
+    height: 30,
     borderRadius: 20,
     backgroundColor: 'rgba(255, 255, 255, 0.8)',
     justifyContent: 'center',
@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   sidebarTitle: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#1a1919ff',
   },
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   profileName: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 4,
   },
@@ -224,7 +224,7 @@ const styles = StyleSheet.create({
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: 10,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(0, 0, 0, 0.05)',
@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
   },
   menuItemText: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 14,
     color: '#1F2937',
     fontWeight: '500',
   },
@@ -275,14 +275,14 @@ const styles = StyleSheet.create({
   logoutButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 15,
+    paddingVertical: 10,
     paddingHorizontal: 20,
     marginHorizontal: 10,
     borderRadius: 10,
   },
   logoutText: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 14,
     color: '#EF4444',
     fontWeight: '600',
     marginLeft: 15,

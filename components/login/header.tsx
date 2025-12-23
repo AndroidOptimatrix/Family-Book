@@ -14,9 +14,9 @@ const Header: React.FC<HeaderProps> = ({ otpSent }) => {
                 resizeMode="contain"
             />
 
-            <Text style={styles.subtitle}>
-                {otpSent ? 'Enter 4-digit OTP to continue' : 'Login with your WhatsApp number'}
-            </Text>
+            {/* <Text style={styles.subtitle}>
+                {otpSent ? 'Enter 4-digit OTP to continue' : ''}
+            </Text> */}
         </View>
     );
 };

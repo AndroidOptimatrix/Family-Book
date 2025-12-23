@@ -1,4 +1,3 @@
-// Header.tsx
 import React from 'react';
 import {
   View,
@@ -10,15 +9,40 @@ import {
 import { Menu, Bell } from 'react-native-feather';
 import LinearGradient from 'react-native-linear-gradient';
 import { AppThemeGradient } from '../../config/config';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
 
 interface HeaderProps {
   onMenuPress: () => void;
   logoSource: any;
+  notificationCount?: number; // Optional notification badge count
 }
 
-const Header: React.FC<HeaderProps> = ({ onMenuPress, logoSource }) => {
+// Define your navigation types
+type RootStackParamList = {
+  DashboardMain: undefined;
+  Notifications: undefined;
+  // Add other screens as needed
+};
+
+const Header: React.FC<HeaderProps> = ({ 
+  onMenuPress, 
+  logoSource,
+  notificationCount = 0 
+}) => {
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+
+  const handleNotificationPress = () => {
+    // Navigate to Notifications screen
+    navigation.navigate('Notifications');
+  };
+
   return (
-    <LinearGradient angle={50} useAngle colors={AppThemeGradient} style={[styles.header, { backgroundColor: 'rgba(240, 253, 252, 1)' }]}>
+    <LinearGradient 
+      angle={50} 
+      useAngle 
+      colors={AppThemeGradient} 
+      style={[styles.header, { backgroundColor: 'rgba(240, 253, 252, 1)' }]}
+    >
       <View style={styles.headerTop}>
         <TouchableOpacity
           style={styles.menuButton}
@@ -34,8 +58,18 @@ const Header: React.FC<HeaderProps> = ({ onMenuPress, logoSource }) => {
           />
         </View>
         <View style={styles.headerRight}>
-          <TouchableOpacity style={styles.iconButton}>
+          <TouchableOpacity 
+            style={styles.iconButton}
+            onPress={handleNotificationPress}
+          >
             <Bell stroke="#1F2937" width={24} height={24} />
+            {notificationCount > 0 && (
+              <View style={styles.notificationBadge}>
+                <Text style={styles.badgeText}>
+                  {notificationCount > 99 ? '99+' : notificationCount}
+                </Text>
+              </View>
+            )}
           </TouchableOpacity>
         </View>
       </View>
@@ -46,7 +80,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuPress, logoSource }) => {
 const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 20,
-    paddingTop: 10,
+    paddingTop: 14,
     paddingBottom: 8,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(0, 0, 0, 0.1)',
@@ -99,8 +133,8 @@ const styles = StyleSheet.create({
   },
   notificationBadge: {
     position: 'absolute',
-    top: 6,
-    right: 6,
+    top: 2,
+    right: 2,
     minWidth: 18,
     height: 18,
     borderRadius: 9,
@@ -108,6 +142,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 4,
+    borderWidth: 2,
+    borderColor: 'rgba(240, 253, 252, 1)', // Match gradient background
   },
   badgeText: {
     fontSize: 10,
