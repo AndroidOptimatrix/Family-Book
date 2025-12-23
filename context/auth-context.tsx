@@ -264,7 +264,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     // Perform login after OTP verification (for already registered users)
     const performLoginAfterOtp = async (userId: string, otp: string): Promise<void> => {
         try {
-            console.log('🔄 Performing login after OTP...');
+            console.log('🔄 Performing login after OTP...', userId);
 
             const params = {
                 type: 'login_otp',

@@ -65,7 +65,7 @@ const NameCollectionModal: React.FC<NameCollectionModalProps> = ({
           ]}
         >
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Welcome to Family Book! 👋</Text>
+            <Text style={styles.modalTitle}>Welcome to Family Book!</Text>
             <TouchableOpacity style={styles.closeButton} onPress={onClose}>
               <X stroke="#6B7280" width={20} height={20} />
             </TouchableOpacity>

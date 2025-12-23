@@ -52,7 +52,6 @@ const LoginForm: React.FC<LoginFormProps> = ({
     const { isLoading, sendOtp, verifyOtp } = useAuth();
     const [buttonScale] = useState(new Animated.Value(1));
 
-    // In LoginForm, change the useEffect to:
     useEffect(() => {
         let interval: number | null = null;
 
@@ -106,7 +105,29 @@ const LoginForm: React.FC<LoginFormProps> = ({
         setPhoneNumber(cleaned);
     };
 
+    const validatePhoneNumber = (): boolean => {
+        // Clean the phone number - remove all non-digit characters
+        const cleanPhoneNumber = phoneNumber.replace(/\D/g, '');
+        
+        // ONLY ONE VALIDATION: Check if phone number is empty
+        if (!cleanPhoneNumber || cleanPhoneNumber.trim() === '') {
+            Alert.alert(
+                'Mobile Number Required',
+                'Please enter your mobile number to receive OTP.',
+                [{ text: 'OK', style: 'default' }]
+            );
+            return false;
+        }
+        
+        return true;
+    };
+
     const handleSendOtp = async () => {
+        // Validate phone number before sending OTP
+        if (!validatePhoneNumber()) {
+            return;
+        }
+        
         try {
             await sendOtp(phoneNumber, countryCallingCode);
             setOtpSent(true);
@@ -191,7 +212,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
                             value={phoneNumber}
                             onChangeText={handlePhoneNumberChange}
                             keyboardType="phone-pad"
-                            maxLength={10}
+                            maxLength={15}
                             editable={!isLoading}
                             selectionColor="#3B82F6"
                             autoComplete="tel"
@@ -246,7 +267,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
                         animateButton();
                         handleLogin();
                     }}
-                    disabled={isLoading || (!otpSent && phoneNumber.length !== 10) || (otpSent && otp.length !== 4)}
+                    disabled={isLoading}
                     activeOpacity={0.9}
                 >
                     <LinearGradient

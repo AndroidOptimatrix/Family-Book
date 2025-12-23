@@ -11,6 +11,7 @@ import { AuthProvider, useAuth } from './context/auth-context';
 import AdvertisementScreen from './pages/advertisement-screen';
 import VideoScreen from './pages/videos-screen';
 import ProfileScreen from './pages/profile-screen';
+import SupportScreen from './pages/support-screen';
 // import SupportScreen from './pages/support-screen';
 
 type RootStackParamList = {
@@ -43,7 +44,7 @@ const DashboardStackNavigator = () => {
       <DashboardStack.Screen name="Videos" component={VideoScreen} />
       <DashboardStack.Screen name="Profile" component={ProfileScreen} />
       <DashboardStack.Screen name="Advertisements" component={AdvertisementScreen} />
-      {/* <DashboardStack.Screen name="Support" component={SupportScreen} /> */}
+      <DashboardStack.Screen name="Support" component={SupportScreen} />
     </DashboardStack.Navigator>
   );
 };

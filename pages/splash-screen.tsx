@@ -262,17 +262,14 @@ const styles = StyleSheet.create({
   appName: {
     fontSize: 42,
     fontWeight: '800',
-    color: 'white',
+    color: '#000',
     marginBottom: 12,
     letterSpacing: 1.5,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 10,
     textAlign: 'center',
   },
   tagline: {
     fontSize: 18,
-    color: 'rgba(255, 255, 255, 0.9)',
+    color: 'rgba(32, 32, 32, 0.9)',
     fontStyle: 'italic',
     textAlign: 'center',
     textShadowColor: 'rgba(0, 0, 0, 0.2)',
@@ -295,11 +292,11 @@ const styles = StyleSheet.create({
   progressBar: {
     height: '100%',
     borderRadius: 3,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#414141ff',
   },
   loadingText: {
     fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: 'rgba(29, 29, 29, 0.8)',
     fontWeight: '500',
   },
   footer: {
@@ -310,13 +307,13 @@ const styles = StyleSheet.create({
   },
   version: {
     fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.6)',
+    color: 'rgba(80, 80, 80, 0.6)',
     marginBottom: 4,
     textAlign: 'center',
   },
   company: {
     fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.5)',
+    color: 'rgba(63, 63, 63, 0.5)',
     textAlign: 'center',
   }
 });
