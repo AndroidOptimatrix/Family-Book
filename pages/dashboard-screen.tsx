@@ -35,8 +35,9 @@ import GridItem from '../components/dashboard/grid-items';
 import AdCarousel from '../components/dashboard/ad-carousel';
 import PlatformCard from '../components/dashboard/plateform-card';
 import EventCard from '../components/dashboard/event-card';
+import ComingSoonModal from '../components/common/coming-soon'; // Import the modal
 
-import { MenuItem, GridItem as GridItemType, Advertisement, Platform, Event } from '../types/dashboard.types';
+import { MenuItem, GridItem as GridItemType, Platform, Event } from '../types/dashboard.types';
 import { useAuth } from '../context/auth-context';
 import useAdvertisement from '../hooks/useAdvertisement';
 
@@ -64,6 +65,8 @@ const DashboardScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp<DashboardStackParamList>>();
   const [refreshing, setRefreshing] = useState(false);
   const [sidebarVisible, setSidebarVisible] = useState(false);
+  const [showComingSoon, setShowComingSoon] = useState(false);
+  const [comingSoonFeature, setComingSoonFeature] = useState('');
   const scrollY = useRef(new Animated.Value(0)).current;
   const sidebarAnim = useRef(new Animated.Value(-width)).current;
 
@@ -71,44 +74,44 @@ const DashboardScreen: React.FC = () => {
   const sidebarMenuItems: MenuItem[] = [
     {
       id: '1',
-      title: 'Birthdays',
-      icon: Calendar,
+      title: 'Notifications',
+      icon: Bell,
       gradient: GREEN_50,
-      screen: '',
+      screen: 'Notifications',
     },
-    {
+      {
       id: '2',
-      title: 'Anniversaries',
-      icon: Heart,
-      gradient: BLUE_50,
-      screen: '',
-    },
-    {
-      id: '3',
       title: 'Events',
       icon: Calendar,
       gradient: PURPLE_50,
       screen: 'Events',
     },
     {
+      id: '3',
+      title: 'Birthdays',
+      icon: Calendar,
+      gradient: BLUE_50,
+      screen: '',
+    },
+    {
       id: '4',
-      title: 'Notifications',
-      icon: Bell,
+      title: 'Anniversaries',
+      icon: Heart,
       gradient: GREEN_50,
-      screen: 'Notifications',
+      screen: '',
     },
     {
       id: '5',
       title: 'Videos',
       icon: Video,
-      gradient: BLUE_50,
+      gradient: PURPLE_50,
       screen: 'Videos',
     },
     {
       id: '6',
       title: 'Advertisements',
       icon: BookOpen,
-      gradient: PURPLE_50,
+      gradient: BLUE_50,
       screen: 'Advertisements',
     },
     {
@@ -116,7 +119,7 @@ const DashboardScreen: React.FC = () => {
       title: 'Help & Support',
       icon: HelpCircle,
       gradient: GREEN_50,
-      screen: '',
+      screen: 'Support',
     },
   ];
 
@@ -243,6 +246,26 @@ const DashboardScreen: React.FC = () => {
 
   const handleMenuItemPress = (item: MenuItem) => {
     closeSidebar();
+    
+    // Check if screen is empty (not ready)
+    if (!item.screen) {
+      setComingSoonFeature(item.title);
+      setShowComingSoon(true);
+      return;
+    }
+    
+    // Navigate to the screen if it exists
+    navigation.navigate(item.screen as keyof DashboardStackParamList);
+  };
+
+  const handleGridItemPress = (item: GridItemType) => {
+    // Check if screen is empty or not ready
+    if (!item.screen) {
+      setComingSoonFeature(item.title);
+      setShowComingSoon(true);
+      return;
+    }
+    
     // Navigate to the screen
     navigation.navigate(item.screen as keyof DashboardStackParamList);
   };
@@ -255,11 +278,6 @@ const DashboardScreen: React.FC = () => {
     } catch (error: any) {
       console.error('Logout error:', error);
     }
-  };
-
-  const handleGridItemPress = (item: GridItemType) => {
-    // Navigate to the screen
-    navigation.navigate(item.screen as keyof DashboardStackParamList);
   };
 
   const Backdrop = () => (
@@ -325,11 +343,7 @@ const DashboardScreen: React.FC = () => {
         >
 
           {/* Main Grid Section */}
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Quick Access</Text>
-              <Text style={styles.sectionSubtitle}>Everything in one place</Text>
-            </View>
+          <View style={[styles.section, {marginTop: 15}]}>
             <View style={styles.gridContainer}>
               {gridRows.map((row, rowIndex) => (
                 <View key={rowIndex} style={styles.gridRow}>
@@ -360,7 +374,6 @@ const DashboardScreen: React.FC = () => {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Follow Us</Text>
-              <Text style={styles.sectionSubtitle}>Stay connected with our community</Text>
             </View>
             <View style={styles.platformsRow}>
               {followPlatforms.map((platform) => (
@@ -387,6 +400,13 @@ const DashboardScreen: React.FC = () => {
           <View style={styles.bottomSpacing} />
         </ScrollView>
       </View>
+
+      {/* Coming Soon Modal */}
+      <ComingSoonModal
+        visible={showComingSoon}
+        onClose={() => setShowComingSoon(false)}
+        featureName={comingSoonFeature}
+      />
     </SafeAreaView>
   );
 };
@@ -426,16 +446,16 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#1F2937',
   },
   sectionSubtitle: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#6B7280',
   },
   seeAllText: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '600',
     color: '#6366F1',
   },

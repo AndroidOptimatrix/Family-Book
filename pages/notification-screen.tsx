@@ -164,7 +164,7 @@ const NotificationScreen: React.FC = () => {
                                 hasReaction && styles.likeButtonTextActive,
                             ]}
                         >
-                            {reactionCount > 0 ? reactionCount : 'Like'}
+                            {reactionCount > 0 ? `${reactionCount} Likes` : 'Like'}
                         </Text>
                     </TouchableOpacity>
                 </View>
@@ -351,16 +351,17 @@ const styles = StyleSheet.create({
     },
     contentContainer: {
         padding: 16,
+        alignItems: 'center',
     },
     notificationTitle: {
-        fontSize: 20,
+        fontSize: 18,
         fontWeight: '700',
         color: '#1F2937',
         marginBottom: 8,
         textAlign: 'center',
     },
     notificationDescription: {
-        fontSize: 14,
+        fontSize: 12,
         color: '#6B7280',
         marginBottom: 12,
         lineHeight: 20,
@@ -379,7 +380,6 @@ const styles = StyleSheet.create({
         marginRight: 12,
     },
     deathBadge: {
-        backgroundColor: '#e4e2feff',
         paddingHorizontal: 8,
         paddingVertical: 4,
         borderRadius: 6,
@@ -393,21 +393,17 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#e2e4feff',
-        paddingVertical: 14,
-        paddingHorizontal: 24,
-        borderRadius: 12,
-        borderWidth: 2,
-        borderColor: '#4447efff',
+        paddingVertical: 12,
+        paddingHorizontal: 32, 
+        minWidth: 140, 
+        alignSelf: 'center', 
     },
     likeButtonActive: {
-        backgroundColor: '#EF4444',
-        borderColor: '#4447efff',
     },
     likeButtonText: {
-        fontSize: 18,
+        fontSize: 12,
         fontWeight: '700',
-        color: '#4447efff',
+        color: '#EF4444',
         marginLeft: 8,
     },
     likeButtonTextActive: {

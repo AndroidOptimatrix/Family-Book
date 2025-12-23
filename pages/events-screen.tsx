@@ -264,7 +264,7 @@ const styles = StyleSheet.create({
         padding: 16,
     },
     eventTitle: {
-        fontSize: 20,
+        fontSize: 18,
         fontWeight: '600',
         color: '#333',
         marginBottom: 12,
@@ -275,13 +275,13 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     eventDetailText: {
-        fontSize: 14,
+        fontSize: 12,
         color: '#666',
         marginLeft: 8,
         flex: 1,
     },
     eventDescription: {
-        fontSize: 15,
+        fontSize: 13,
         color: '#444',
         lineHeight: 22,
         marginTop: 12,
