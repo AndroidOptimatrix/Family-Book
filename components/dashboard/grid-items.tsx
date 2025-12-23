@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
   },
   container: {
     width: '100%',
-    height: CARD_WIDTH, // Make it square (or adjust ratio)
+    height:100, // Make it square (or adjust ratio)
     borderRadius: 12,
     elevation: 0,
     shadowColor: '#000',
