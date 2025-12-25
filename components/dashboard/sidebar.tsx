@@ -123,8 +123,8 @@ const Sidebar: React.FC<SidebarProps> = ({
           style={[styles.logoutButton, { backgroundColor: 'rgba(239, 68, 68, 0.1)' }]}
           onPress={onLogout}
         >
-          <View style={[styles.menuIconContainer, { backgroundColor: 'rgba(239, 68, 68, 0.2)' }]}>
-            <LogOut stroke="#EF4444" width={18} height={18} />
+          <View style={[styles.menuIconContainer, { backgroundColor: 'rgba(239, 68, 68, 0.1)' }]}>
+            <LogOut stroke="#EF4444" width={17} height={17} />
           </View>
           <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
@@ -224,7 +224,7 @@ const styles = StyleSheet.create({
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 10,
+    paddingVertical: 5,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(0, 0, 0, 0.05)',
@@ -233,8 +233,8 @@ const styles = StyleSheet.create({
     marginVertical: 4,
   },
   menuIconContainer: {
-    width: 40,
-    height: 40,
+    width: 38,
+    height: 38,
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
@@ -275,7 +275,7 @@ const styles = StyleSheet.create({
   logoutButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 10,
+    paddingVertical: 5,
     paddingHorizontal: 20,
     marginHorizontal: 10,
     borderRadius: 10,
@@ -288,9 +288,9 @@ const styles = StyleSheet.create({
     marginLeft: 15,
   },
   versionContainer: {
-    padding: 25,
+    padding: 10,
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: 2,
   },
   versionText: {
     fontSize: 12,

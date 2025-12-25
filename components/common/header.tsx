@@ -28,12 +28,12 @@ const LinearHeader = ({ title, subtitle, isProfile }: { title: string, subtitle:
                     <Text style={styles.headerSubtitle}>{subtitle}</Text>
                 </View>
 
-                {isProfile && <TouchableOpacity
+                {/* {isProfile && <TouchableOpacity
                     style={styles.editButton}
                     onPress={() => console.log('Edit profile')}
                 >
                     <Edit2 stroke="#222222" width={20} height={20} />
-                </TouchableOpacity>}
+                </TouchableOpacity>} */}
             </View>
         </LinearGradient>
     )

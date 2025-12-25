@@ -30,8 +30,6 @@ export type Platform = {
   id: string;
   name: string;
   icon: ComponentType<any>;
-  handle: string;
-  followers: string;
   url: string;
   gradient: string[];
 };

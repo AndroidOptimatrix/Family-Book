@@ -1,4 +1,3 @@
-// screens/SupportScreen.tsx
 import React from 'react';
 import {
   SafeAreaView,
@@ -11,18 +10,13 @@ import {
   StyleSheet,
   Dimensions,
 } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
 import {
   Mail,
   Phone,
   MessageCircle,
-  Globe,
-  HelpCircle,
-  Headphones,
   Clock,
   Info,
 } from 'react-native-feather';
-import { AppThemeGradient } from '../config/config';
 import LinearHeader from '../components/common/header';
 
 const { width } = Dimensions.get('window');
@@ -67,8 +61,6 @@ const SupportItem: React.FC<SupportItemProps> = ({
 const SupportScreen: React.FC = () => {
   const supportEmail = 'support@familybook.com';
   const supportPhone = '+91 1800 123 4567';
-  const websiteUrl = 'https://familybook.com';
-  const faqUrl = 'https://familybook.com/faq';
   const whatsappNumber = '+919876543210';
 
   const handleEmailPress = () => {
@@ -94,35 +86,6 @@ const SupportScreen: React.FC = () => {
         [{ text: 'OK' }]
       );
     });
-  };
-
-  const handleWebsitePress = () => {
-    Linking.openURL(websiteUrl).catch(() => {
-      Alert.alert('Error', 'Unable to open website');
-    });
-  };
-
-  const handleFAQsPress = () => {
-    Linking.openURL(faqUrl).catch(() => {
-      Alert.alert('Error', 'Unable to open FAQs');
-    });
-  };
-
-  const handleLiveChatPress = () => {
-    Alert.alert(
-      'Live Chat',
-      'Our live chat support hours are 9 AM to 6 PM, Monday to Saturday.',
-      [
-        {
-          text: 'Start Chat',
-          onPress: () => Alert.alert('Info', 'Connecting to chat agent...')
-        },
-        {
-          text: 'Cancel',
-          style: 'cancel'
-        }
-      ]
-    );
   };
 
   const supportItems: SupportItemProps[] = [
@@ -220,14 +183,12 @@ const SupportScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    padding: 0
   },
   gradientBackground: {
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-    paddingBottom: 40,
   },
   header: {
     alignItems: 'center',
@@ -258,6 +219,7 @@ const styles = StyleSheet.create({
   },
   cardsContainer: {
     marginBlock: 30,
+    paddingInline: 15
   },
   supportItem: {
     flexDirection: 'row',
@@ -311,6 +273,7 @@ const styles = StyleSheet.create({
   },
   contactInfoContainer: {
     marginBottom: 30,
+    paddingInline: 15
   },
   sectionTitle: {
     fontSize: 20,

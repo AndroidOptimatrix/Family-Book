@@ -25,7 +25,8 @@ import {
   HelpCircle,
   Video,
   User,
-  BookOpen
+  BookOpen,
+  Globe
 } from 'react-native-feather';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 
@@ -35,11 +36,12 @@ import GridItem from '../components/dashboard/grid-items';
 import AdCarousel from '../components/dashboard/ad-carousel';
 import PlatformCard from '../components/dashboard/plateform-card';
 import EventCard from '../components/dashboard/event-card';
-import ComingSoonModal from '../components/common/coming-soon'; // Import the modal
+import ComingSoonModal from '../components/common/coming-soon';
 
 import { MenuItem, GridItem as GridItemType, Platform, Event } from '../types/dashboard.types';
 import { useAuth } from '../context/auth-context';
 import useAdvertisement from '../hooks/useAdvertisement';
+import useSocialMedia from '../hooks/useSocialMedia';
 
 type DashboardStackParamList = {
   DashboardMain: undefined;
@@ -70,6 +72,55 @@ const DashboardScreen: React.FC = () => {
   const scrollY = useRef(new Animated.Value(0)).current;
   const sidebarAnim = useRef(new Animated.Value(-width)).current;
 
+  const { loading, socialMedia } = useSocialMedia();
+
+  // Map social media platforms from API to Platform type
+  const followPlatforms: Platform[] = socialMedia.map((item) => {
+    const platformName = item.plateform.toLowerCase();
+
+    // Determine icon based on platform name
+    let IconComponent = Globe; // Default icon
+
+    if (platformName.includes('facebook')) {
+      IconComponent = Facebook;
+    } else if (platformName.includes('instagram')) {
+      IconComponent = Instagram;
+    } else if (platformName.includes('youtube')) {
+      IconComponent = Youtube;
+    } else if (platformName.includes('twitter')) {
+      IconComponent = require('react-native-vector-icons/Feather').Twitter || Globe;
+    } else if (platformName.includes('linkedin')) {
+      IconComponent = require('react-native-vector-icons/Feather').Linkedin || Globe;
+    } else if (platformName.includes('whatsapp')) {
+      IconComponent = require('react-native-vector-icons/Feather').MessageCircle || Globe;
+    }
+
+    // Determine gradient based on platform name
+    let gradient = ['#3B82F6', '#1E40AF']; // Default gradient
+
+    if (platformName.includes('facebook')) {
+      gradient = ['#1877F2', '#0A5BC4'];
+    } else if (platformName.includes('instagram')) {
+      gradient = ['#E4405F', '#C13584'];
+    } else if (platformName.includes('youtube')) {
+      gradient = ['#FF0000', '#CC0000'];
+    } else if (platformName.includes('twitter')) {
+      gradient = ['#1DA1F2', '#0D8BD9'];
+    } else if (platformName.includes('linkedin')) {
+      gradient = ['#0077B5', '#005582'];
+    } else if (platformName.includes('whatsapp')) {
+      gradient = ['#25D366', '#128C7E'];
+    }
+
+    return {
+      id: item.id.toString(),
+      name: item.plateform,
+      icon: IconComponent,
+      url: item.url || '#', // Use URL from API, fallback to '#'
+      gradient: gradient,
+    };
+  });
+
   // Data
   const sidebarMenuItems: MenuItem[] = [
     {
@@ -79,27 +130,6 @@ const DashboardScreen: React.FC = () => {
       gradient: GREEN_50,
       screen: 'Notifications',
     },
-      {
-      id: '2',
-      title: 'Events',
-      icon: Calendar,
-      gradient: PURPLE_50,
-      screen: 'Events',
-    },
-    {
-      id: '3',
-      title: 'Birthdays',
-      icon: Calendar,
-      gradient: BLUE_50,
-      screen: '',
-    },
-    {
-      id: '4',
-      title: 'Anniversaries',
-      icon: Heart,
-      gradient: GREEN_50,
-      screen: '',
-    },
     {
       id: '5',
       title: 'Videos',
@@ -108,11 +138,33 @@ const DashboardScreen: React.FC = () => {
       screen: 'Videos',
     },
     {
+      id: '2',
+      title: 'Events',
+      icon: Calendar,
+      gradient: BLUE_50,
+      screen: 'Events',
+    },
+
+    {
       id: '6',
       title: 'Advertisements',
       icon: BookOpen,
-      gradient: BLUE_50,
+      gradient: GREEN_50,
       screen: 'Advertisements',
+    },
+    {
+      id: '3',
+      title: 'Birthdays',
+      icon: Calendar,
+      gradient: PURPLE_50,
+      screen: '',
+    },
+    {
+      id: '4',
+      title: 'Anniversaries',
+      icon: Heart,
+      gradient: BLUE_50,
+      screen: '',
     },
     {
       id: '7',
@@ -132,77 +184,49 @@ const DashboardScreen: React.FC = () => {
       screen: 'Notifications',
       icon_bg: ['#accdffff', '#0048e4ff']
     },
+
     {
       id: '2',
-      title: 'Birthday',
-      icon: Calendar,
+      title: 'Video',
+      icon: VideoIcon,
       gradient: BLUE_50,
-      screen: '',
+      screen: 'Videos',
       icon_bg: ['#accdffff', '#0048e4ff']
+
     },
     {
       id: '3',
-      title: 'Anniversary',
-      icon: Heart,
+      title: 'Events',
+      icon: Users,
       gradient: BLUE_50,
-      screen: '',
+      screen: 'Events',
       icon_bg: ['#accdffff', '#0048e4ff']
+
     },
     {
       id: '4',
-      title: 'Video',
-      icon: VideoIcon,
-      gradient: PURPLE_50,
-      screen: 'Videos',
-      icon_bg: ['#eaccffff', '#5300acff']
-    },
-    {
-      id: '5',
-      title: 'Events',
-      icon: Users,
-      gradient: PURPLE_50,
-      screen: 'Events',
-      icon_bg: ['#eaccffff', '#5300acff']
-    },
-    {
-      id: '6',
       title: 'My Profile',
       icon: User,
       gradient: PURPLE_50,
       screen: 'Profile',
       icon_bg: ['#eaccffff', '#5300acff']
     },
-  ];
-
-  const followPlatforms: Platform[] = [
     {
-      id: '3',
-      name: 'YouTube',
-      icon: Youtube,
-      handle: 'Family Book',
-      followers: '9K+ subscribers',
-      url: 'https://youtube.com/c/FamilyBookChannel',
-      gradient: ['#FF0000', '#CC0000'],
+      id: '5',
+      title: 'Birthday',
+      icon: Calendar,
+      gradient: PURPLE_50,
+      screen: '',
+      icon_bg: ['#eaccffff', '#5300acff']
     },
     {
-      id: '1',
-      name: 'Facebook',
-      icon: Facebook,
-      handle: '@FamilyBook',
-      followers: '50K+ followers',
-      url: 'https://facebook.com/FamilyBookOfficial',
-      gradient: ['#1877F2', '#0A5BC4'],
+      id: '6',
+      title: 'Anniversary',
+      icon: Heart,
+      gradient: PURPLE_50,
+      screen: '',
+      icon_bg: ['#eaccffff', '#5300acff']
     },
-    {
-      id: '2',
-      name: 'Instagram',
-      icon: Instagram,
-      handle: '@familybook',
-      followers: '25K+ followers',
-      url: 'https://instagram.com/familybook',
-      gradient: ['#E4405F', '#C13584'],
-    },
-
   ];
 
   const events: Event[] = [
@@ -246,14 +270,14 @@ const DashboardScreen: React.FC = () => {
 
   const handleMenuItemPress = (item: MenuItem) => {
     closeSidebar();
-    
+
     // Check if screen is empty (not ready)
     if (!item.screen) {
       setComingSoonFeature(item.title);
       setShowComingSoon(true);
       return;
     }
-    
+
     // Navigate to the screen if it exists
     navigation.navigate(item.screen as keyof DashboardStackParamList);
   };
@@ -265,7 +289,7 @@ const DashboardScreen: React.FC = () => {
       setShowComingSoon(true);
       return;
     }
-    
+
     // Navigate to the screen
     navigation.navigate(item.screen as keyof DashboardStackParamList);
   };
@@ -343,7 +367,7 @@ const DashboardScreen: React.FC = () => {
         >
 
           {/* Main Grid Section */}
-          <View style={[styles.section, {marginTop: 15}]}>
+          <View style={[styles.section, { marginTop: 15 }]}>
             <View style={styles.gridContainer}>
               {gridRows.map((row, rowIndex) => (
                 <View key={rowIndex} style={styles.gridRow}>
@@ -375,11 +399,42 @@ const DashboardScreen: React.FC = () => {
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Follow Us</Text>
             </View>
-            <View style={styles.platformsRow}>
-              {followPlatforms.map((platform) => (
-                <PlatformCard key={platform.id} platform={platform} />
-              ))}
-            </View>
+            {loading ? (
+              <View style={styles.loadingContainer}>
+                <Text style={styles.loadingText}>Loading social platforms...</Text>
+              </View>
+            ) : followPlatforms.length > 0 ? (
+              <View style={styles.platformsRow}>
+                {followPlatforms.slice(0, 3).map((platform) => (
+                  <PlatformCard key={platform.id} platform={platform} />
+                ))}
+              </View>
+            ) : (
+              <View style={styles.platformsRow}>
+                {/* Fallback to hardcoded platforms if API returns no data */}
+                <PlatformCard platform={{
+                  id: '1',
+                  name: 'Facebook',
+                  icon: Facebook,
+                  url: 'https://facebook.com/FamilyBookOfficial',
+                  gradient: ['#1877F2', '#0A5BC4'],
+                }} />
+                <PlatformCard platform={{
+                  id: '2',
+                  name: 'Instagram',
+                  icon: Instagram,
+                  url: 'https://instagram.com/familybook',
+                  gradient: ['#E4405F', '#C13584'],
+                }} />
+                <PlatformCard platform={{
+                  id: '3',
+                  name: 'YouTube',
+                  icon: Youtube,
+                  url: 'https://youtube.com/c/FamilyBookChannel',
+                  gradient: ['#FF0000', '#CC0000'],
+                }} />
+              </View>
+            )}
           </View>
 
           {/* Events Section */}
@@ -477,6 +532,14 @@ const styles = StyleSheet.create({
   },
   bottomSpacing: {
     height: 20,
+  },
+  loadingContainer: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 14,
+    color: '#6B7280',
   },
 });
 

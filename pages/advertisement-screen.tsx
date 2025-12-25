@@ -74,7 +74,7 @@ const AdvertisementScreen: React.FC = () => {
                 <Image
                     source={{ uri: item.image }}
                     style={styles.adImage}
-                    resizeMode="cover"
+                    resizeMode="contain"
                 />
                 <View style={styles.imageOverlay}>
                     <Maximize2 stroke="#FFFFFF" width={20} height={20} />
