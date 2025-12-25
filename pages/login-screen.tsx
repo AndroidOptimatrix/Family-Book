@@ -11,6 +11,8 @@ import {
   Easing,
   Alert,
   StyleSheet,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { AppThemeGradient } from '../config/config';
@@ -46,10 +48,33 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
   const [canResend, setCanResend] = useState<boolean>(false);
   const [showNameModal, setShowNameModal] = useState<boolean>(false);
   const [userName, setUserName] = useState<string>('');
+  const [keyboardVisible, setKeyboardVisible] = useState<boolean>(false);
 
   const timerRef = useRef<number | null>(null);
   const fadeAnim = useState(new Animated.Value(0))[0];
   const slideAnim = useState(new Animated.Value(30))[0];
+
+  // Keyboard listeners
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      () => {
+        setKeyboardVisible(true);
+      }
+    );
+    
+    const keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => {
+        setKeyboardVisible(false);
+      }
+    );
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
 
   // Show name modal when registration is required
   useEffect(() => {
@@ -157,81 +182,94 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
     }
   };
 
+  const dismissKeyboard = () => {
+    Keyboard.dismiss();
+  };
+
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#1E40AF" />
+    <TouchableWithoutFeedback onPress={dismissKeyboard}>
+      <SafeAreaView style={styles.container}>
+        <StatusBar barStyle="light-content" backgroundColor="#1E40AF" />
 
-      <CountryPickerWrapper
-        visible={showCountryPicker}
-        countryCode={countryCode}
-        onSelect={(code: string, callingCode: string) => {
-          setCountryCode(code);
-          setCountryCallingCode(callingCode);
-          setShowCountryPicker(false);
-        }}
-        onClose={() => setShowCountryPicker(false)}
-      />
+        <CountryPickerWrapper
+          visible={showCountryPicker}
+          countryCode={countryCode}
+          onSelect={(code: string, callingCode: string) => {
+            setCountryCode(code);
+            setCountryCallingCode(callingCode);
+            setShowCountryPicker(false);
+          }}
+          onClose={() => setShowCountryPicker(false)}
+        />
 
-      <NameCollectionModal
-        visible={showNameModal}
-        userName={userName}
-        phoneNumber={getFormattedPhoneForDisplay()}
-        onNameChange={setUserName}
-        onSubmit={handleNameSubmit}
-        onClose={() => setShowNameModal(false)}
-      />
+        <NameCollectionModal
+          visible={showNameModal}
+          userName={userName}
+          phoneNumber={getFormattedPhoneForDisplay()}
+          onNameChange={setUserName}
+          onSubmit={handleNameSubmit}
+          onClose={() => setShowNameModal(false)}
+        />
 
-      <LinearGradient
-        colors={AppThemeGradient}
-        style={styles.gradientBackground}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        locations={[0, 0.4, 0.7, 1]}
-      >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={styles.keyboardAvoid}
+        <LinearGradient
+          colors={AppThemeGradient}
+          style={styles.gradientBackground}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          locations={[0, 0.4, 0.7, 1]}
         >
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.scrollContent}
-            keyboardShouldPersistTaps="handled"
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={styles.keyboardAvoid}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
           >
-            <Animated.View
-              style={[
-                styles.content,
-                {
-                  opacity: fadeAnim,
-                  transform: [{ translateY: slideAnim }],
-                },
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={[
+                styles.scrollContent,
+                keyboardVisible && styles.scrollContentKeyboardOpen
               ]}
+              keyboardShouldPersistTaps="handled"
+              // Add this to automatically scroll to input
+              keyboardDismissMode="interactive"
             >
-              <Header otpSent={otpSent} />
+              <Animated.View
+                style={[
+                  styles.content,
+                  {
+                    opacity: fadeAnim,
+                    transform: [{ translateY: slideAnim }],
+                  },
+                ]}
+              >
+                <Header otpSent={otpSent} />
 
-              <LoginForm
-                phoneNumber={phoneNumber}
-                setPhoneNumber={setPhoneNumber}
-                countryCallingCode={countryCallingCode}
-                setCountryCallingCode={setCountryCallingCode}
-                otpSent={otpSent}
-                setOtpSent={setOtpSent}
-                otp={otp}
-                setOtp={setOtp}
-                resendTimer={resendTimer}
-                setResendTimer={setResendTimer}
-                canResend={canResend}
-                setCanResend={setCanResend}
-                onRegistrationRequired={() => setShowCountryPicker(true)}
-              />
+                <LoginForm
+                  phoneNumber={phoneNumber}
+                  setPhoneNumber={setPhoneNumber}
+                  countryCallingCode={countryCallingCode}
+                  setCountryCallingCode={setCountryCallingCode}
+                  otpSent={otpSent}
+                  setOtpSent={setOtpSent}
+                  otp={otp}
+                  setOtp={setOtp}
+                  resendTimer={resendTimer}
+                  setResendTimer={setResendTimer}
+                  canResend={canResend}
+                  setCanResend={setCanResend}
+                  onRegistrationRequired={() => setShowCountryPicker(true)}
+                  keyboardVisible={keyboardVisible}
+                />
 
-              <TermsFooter />
-            </Animated.View>
-          </ScrollView>
-        </KeyboardAvoidingView>
+                <TermsFooter />
+              </Animated.View>
+            </ScrollView>
+          </KeyboardAvoidingView>
 
-        <FloatingElements />
-      </LinearGradient>
-    </SafeAreaView>
+          <FloatingElements />
+        </LinearGradient>
+      </SafeAreaView>
+    </TouchableWithoutFeedback>
   );
 };
 
@@ -248,9 +286,13 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    justifyContent: 'center' as const,
+    justifyContent: 'center',
     paddingVertical: 20,
     minHeight: height,
+  },
+  scrollContentKeyboardOpen: {
+    paddingBottom: 100, // Extra space when keyboard is open
+    justifyContent: 'flex-start',
   },
   content: {
     paddingHorizontal: 24,

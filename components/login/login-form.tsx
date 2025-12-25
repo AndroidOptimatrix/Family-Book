@@ -1,5 +1,5 @@
 import OTPInput from './otp-input';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/auth-context';
 import LinearGradient from 'react-native-linear-gradient';
 import { ChevronRight, ChevronDown } from 'react-native-feather';
@@ -13,6 +13,8 @@ import {
     Animated,
     Image,
     Alert,
+    Keyboard,
+    Platform,
 } from 'react-native';
 
 interface LoginFormProps {
@@ -51,6 +53,8 @@ const LoginForm: React.FC<LoginFormProps> = ({
 }) => {
     const { isLoading, sendOtp, verifyOtp } = useAuth();
     const [buttonScale] = useState(new Animated.Value(1));
+    const formRef = useRef<View>(null);
+    const phoneInputRef = useRef<TextInput>(null);
 
     useEffect(() => {
         let interval: number | null = null;
@@ -73,6 +77,14 @@ const LoginForm: React.FC<LoginFormProps> = ({
             }
         };
     }, [otpSent, resendTimer]);
+
+    // Auto-scroll to input when keyboard opens
+    useEffect(() => {
+        if (keyboardVisible && phoneInputRef.current && !otpSent) {
+            // Focus on phone input when keyboard opens
+            phoneInputRef.current.focus();
+        }
+    }, [keyboardVisible, otpSent]);
 
     const animateButton = () => {
         Animated.sequence([
@@ -108,7 +120,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
     const validatePhoneNumber = (): boolean => {
         // Clean the phone number - remove all non-digit characters
         const cleanPhoneNumber = phoneNumber.replace(/\D/g, '');
-        
+
         // ONLY ONE VALIDATION: Check if phone number is empty
         if (!cleanPhoneNumber || cleanPhoneNumber.trim() === '') {
             Alert.alert(
@@ -118,7 +130,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
             );
             return false;
         }
-        
+
         return true;
     };
 
@@ -127,7 +139,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
         if (!validatePhoneNumber()) {
             return;
         }
-        
+
         try {
             await sendOtp(phoneNumber, countryCallingCode);
             setOtpSent(true);
@@ -136,6 +148,8 @@ const LoginForm: React.FC<LoginFormProps> = ({
             if (onPhoneVerified) {
                 onPhoneVerified(`${countryCallingCode}${phoneNumber}`);
             }
+            // Dismiss keyboard after sending OTP
+            Keyboard.dismiss();
         } catch (error: any) {
             console.error('Send OTP error:', error);
             Alert.alert('Error', error.message || 'Failed to send OTP');
@@ -147,6 +161,8 @@ const LoginForm: React.FC<LoginFormProps> = ({
             const fullPhone = `${countryCallingCode}${phoneNumber}`;
             await verifyOtp(fullPhone, otp);
             // Success will be handled by AuthContext
+            // Dismiss keyboard after verification
+            Keyboard.dismiss();
         } catch (error: any) {
             console.error('Verify OTP error:', error);
             Alert.alert('Error', error.message || 'OTP verification failed');
@@ -173,6 +189,10 @@ const LoginForm: React.FC<LoginFormProps> = ({
         setPhoneNumber('');
         setCanResend(false);
         setResendTimer(30);
+        // Focus on phone input when changing number
+        setTimeout(() => {
+            phoneInputRef.current?.focus();
+        }, 100);
     };
 
     const handleLogin = () => {
@@ -183,113 +203,135 @@ const LoginForm: React.FC<LoginFormProps> = ({
         }
     };
 
+    const handleFormPress = () => {
+        // Dismiss keyboard when tapping on form (but not on inputs/buttons)
+        Keyboard.dismiss();
+    };
+
     return (
-        <View style={[styles.formContainer, keyboardVisible && styles.containerKeyboardOpen]}>
-            {!otpSent ? (
-                <View style={styles.inputGroup}>
-                    <Text style={styles.inputLabel}>WhatsApp Number</Text>
-                    <View style={styles.inputContainer}>
-                        <TouchableOpacity
-                            style={styles.countryCodeButton}
-                            onPress={() => {
-                                // Country picker will be handled by parent
-                                if (onRegistrationRequired) {
-                                    onRegistrationRequired();
-                                }
-                            }}
-                            activeOpacity={0.7}
-                        >
-                            <Text style={styles.countryCodeText}>+{countryCallingCode}</Text>
-                            <ChevronDown stroke="#6B7280" width={16} height={16} />
-                        </TouchableOpacity>
+        <TouchableOpacity 
+          activeOpacity={1} 
+          onPress={handleFormPress}
+          style={[
+            styles.formContainer, 
+            keyboardVisible && styles.containerKeyboardOpen
+          ]}
+        >
+            <View ref={formRef}>
+                {!otpSent ? (
+                    <View style={styles.inputGroup}>
+                        <View style={styles.inputText}>
+                            <Image source={require('../../whatsapp.png')} style={{ width: 20, height: 20 }} />
+                            <Text style={styles.inputLabel}>WhatsApp Number</Text>
+                        </View>
+                        <View style={styles.inputContainer}>
+                            <TouchableOpacity
+                                style={styles.countryCodeButton}
+                                onPress={() => {
+                                    // Country picker will be handled by parent
+                                    if (onRegistrationRequired) {
+                                        onRegistrationRequired();
+                                    }
+                                }}
+                                activeOpacity={0.7}
+                            >
+                                <Text style={styles.countryCodeText}>+{countryCallingCode}</Text>
+                                <ChevronDown stroke="#6B7280" width={16} height={16} />
+                            </TouchableOpacity>
 
-                        <View style={styles.separator} />
+                            <View style={styles.separator} />
 
-                        <TextInput
-                            style={styles.textInput}
-                            placeholder="Enter your number"
-                            placeholderTextColor="#9CA3AF"
-                            value={phoneNumber}
-                            onChangeText={handlePhoneNumberChange}
-                            keyboardType="phone-pad"
-                            maxLength={15}
+                            <TextInput
+                                ref={phoneInputRef}
+                                style={styles.textInput}
+                                placeholder="Enter your number"
+                                placeholderTextColor="#9CA3AF"
+                                value={phoneNumber}
+                                onChangeText={handlePhoneNumberChange}
+                                keyboardType="phone-pad"
+                                maxLength={15}
+                                editable={!isLoading}
+                                selectionColor="#3B82F6"
+                                autoComplete="tel"
+                                returnKeyType="done"
+                                onSubmitEditing={handleSendOtp}
+                                blurOnSubmit={false}
+                            />
+                        </View>
+                        <Text style={styles.inputHelper}>
+                            We'll send a 4-digit verification code via WhatsApp message
+                        </Text>
+                    </View>
+                ) : (
+                    <View style={styles.otpContainer}>
+                        <View style={styles.otpHeader}>
+                            <Image source={require('../../whatsapp.png')} style={{ width: 36, height: 36 }} />
+                            <Text style={styles.otpTitle}>Enter OTP</Text>
+                        </View>
+                        <Text style={styles.otpSubtitle}>
+                            Sent to {getFormattedPhoneForDisplay()} via WhatsApp
+                        </Text>
+
+                        <OTPInput
+                            value={otp}
+                            onChangeText={setOtp}
                             editable={!isLoading}
-                            selectionColor="#3B82F6"
-                            autoComplete="tel"
+                            autoFocus={true}
                         />
-                    </View>
-                    <Text style={styles.inputHelper}>
-                        We'll send a 4-digit verification code via WhatsApp message
-                    </Text>
-                </View>
-            ) : (
-                <View style={styles.otpContainer}>
-                    <View style={styles.otpHeader}>
-                        <Image source={require('../../whatsapp.png')} style={{ width: 40, height: 40 }} />
-                        <Text style={styles.otpTitle}>Enter OTP</Text>
-                    </View>
-                    <Text style={styles.otpSubtitle}>
-                        Sent to {getFormattedPhoneForDisplay()} via WhatsApp
-                    </Text>
 
-                    <OTPInput
-                        value={otp}
-                        onChangeText={setOtp}
-                        editable={!isLoading}
-                    />
-
-                    <View style={styles.otpActions}>
-                        <TouchableOpacity onPress={handleChangeNumber} disabled={isLoading}>
-                            <Text style={[styles.resendText, isLoading && styles.disabledText]}>
-                                Change number
-                            </Text>
-                        </TouchableOpacity>
-                        <View style={styles.verticalDivider} />
-                        <TouchableOpacity onPress={handleResendOtp} disabled={!canResend || isLoading}>
-                            {canResend ? (
+                        <View style={styles.otpActions}>
+                            <TouchableOpacity onPress={handleChangeNumber} disabled={isLoading}>
                                 <Text style={[styles.resendText, isLoading && styles.disabledText]}>
-                                    Resend OTP
+                                    Change number
                                 </Text>
-                            ) : (
-                                <Text style={styles.timerText}>
-                                    Resend in {formatTimer(resendTimer)}
-                                </Text>
-                            )}
-                        </TouchableOpacity>
+                            </TouchableOpacity>
+                            <View style={styles.verticalDivider} />
+                            <TouchableOpacity onPress={handleResendOtp} disabled={!canResend || isLoading}>
+                                {canResend ? (
+                                    <Text style={[styles.resendText, isLoading && styles.disabledText]}>
+                                        Resend OTP
+                                    </Text>
+                                ) : (
+                                    <Text style={styles.timerText}>
+                                        Resend in {formatTimer(resendTimer)}
+                                    </Text>
+                                )}
+                            </TouchableOpacity>
+                        </View>
                     </View>
-                </View>
-            )}
+                )}
 
-            <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
-                <TouchableOpacity
-                    style={[styles.loginButton, isLoading && styles.loginButtonDisabled]}
-                    onPress={() => {
-                        animateButton();
-                        handleLogin();
-                    }}
-                    disabled={isLoading}
-                    activeOpacity={0.9}
-                >
-                    <LinearGradient
-                        colors={['#3B82F6', '#1E40AF']}
-                        style={styles.buttonGradient}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 0 }}
+                <Animated.View style={{ transform: [{ scale: buttonScale }], marginTop: keyboardVisible ? 20 : 0 }}>
+                    <TouchableOpacity
+                        style={[styles.loginButton, isLoading && styles.loginButtonDisabled]}
+                        onPress={() => {
+                            animateButton();
+                            handleLogin();
+                        }}
+                        disabled={isLoading}
+                        activeOpacity={0.9}
                     >
-                        {isLoading ? (
-                            <ActivityIndicator color="#FFFFFF" size="small" />
-                        ) : (
-                            <View style={styles.buttonContent}>
-                                <Text style={styles.loginButtonText}>
-                                    {otpSent ? 'Verify & Continue' : 'Send OTP via WhatsApp'}
-                                </Text>
-                                <ChevronRight stroke="#FFFFFF" width={20} height={20} />
-                            </View>
-                        )}
-                    </LinearGradient>
-                </TouchableOpacity>
-            </Animated.View>
-        </View>
+                        <LinearGradient
+                            colors={['#3B82F6', '#1E40AF']}
+                            style={styles.buttonGradient}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 0 }}
+                        >
+                            {isLoading ? (
+                                <ActivityIndicator color="#FFFFFF" size="small" />
+                            ) : (
+                                <View style={styles.buttonContent}>
+                                    <Text style={styles.loginButtonText}>
+                                        {otpSent ? 'Verify & Continue' : 'Send OTP via WhatsApp'}
+                                    </Text>
+                                    <ChevronRight stroke="#FFFFFF" width={20} height={20} />
+                                </View>
+                            )}
+                        </LinearGradient>
+                    </TouchableOpacity>
+                </Animated.View>
+            </View>
+        </TouchableOpacity>
     );
 };
 
@@ -298,12 +340,17 @@ const styles = StyleSheet.create({
         backgroundColor: '#FFFFFF',
         borderRadius: 20,
         padding: 24,
-        marginBottom: 24,
-        shadowRadius: 25,
-        zIndex: 50
+        marginBottom: 54,
+        zIndex: 50,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 12,
+        elevation: 8,
     },
     containerKeyboardOpen: {
-        marginTop: -20,
+        marginTop: Platform.OS === 'ios' ? -50 : -20,
+        marginBottom: 20,
     },
     inputGroup: {
         marginBottom: 24,
@@ -314,6 +361,12 @@ const styles = StyleSheet.create({
         color: '#374151',
         marginBottom: 8,
     },
+    inputText: {
+        display: 'flex',
+        gap: 5,
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
     inputContainer: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -321,7 +374,8 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         borderWidth: 1.5,
         borderColor: '#E5E7EB',
-        padding: 10
+        padding: 10,
+        marginTop: 8,
     },
     countryCodeButton: {
         flexDirection: 'row',
@@ -329,7 +383,8 @@ const styles = StyleSheet.create({
         backgroundColor: '#F9FAFB',
         borderRadius: 8,
         minWidth: 40,
-        padding: 4
+        paddingHorizontal: 8,
+        paddingVertical: 6,
     },
     countryCodeText: {
         fontSize: 16,
@@ -350,12 +405,14 @@ const styles = StyleSheet.create({
         padding: 0,
         fontWeight: '500',
         minHeight: 40,
+        paddingVertical: 8,
     },
     inputHelper: {
         fontSize: 13,
         color: '#6B7280',
         marginTop: 8,
         marginLeft: 4,
+        lineHeight: 18,
     },
     otpContainer: {
         alignItems: 'center',
@@ -368,7 +425,7 @@ const styles = StyleSheet.create({
         marginBottom: 12,
     },
     otpTitle: {
-        fontSize: 22,
+        fontSize: 18,
         fontWeight: 'bold',
         color: '#1F2937',
     },
@@ -377,11 +434,13 @@ const styles = StyleSheet.create({
         color: '#6B7280',
         marginBottom: 24,
         textAlign: 'center',
+        lineHeight: 20,
     },
     otpActions: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 12,
+        marginTop: 16,
     },
     resendText: {
         fontSize: 14,
@@ -419,7 +478,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     loginButtonText: {
-        fontSize: 18,
+        fontSize: 15,
         fontWeight: 'bold',
         color: '#FFFFFF',
         marginRight: 10,
