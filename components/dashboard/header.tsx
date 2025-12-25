@@ -5,6 +5,8 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
+  Platform,
+  StatusBar,
 } from 'react-native';
 import { Menu, Bell } from 'react-native-feather';
 import LinearGradient from 'react-native-linear-gradient';
@@ -14,22 +16,39 @@ import { useNavigation, NavigationProp } from '@react-navigation/native';
 interface HeaderProps {
   onMenuPress: () => void;
   logoSource: any;
-  notificationCount?: number; // Optional notification badge count
 }
 
 // Define your navigation types
 type RootStackParamList = {
   DashboardMain: undefined;
   Notifications: undefined;
-  // Add other screens as needed
 };
 
 const Header: React.FC<HeaderProps> = ({ 
   onMenuPress, 
   logoSource,
-  notificationCount = 0 
 }) => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+
+  // Function to calculate top padding based on platform and version
+  const getTopPadding = () => {
+    if (Platform.OS === 'ios') {
+      // For iOS, use status bar height + some padding
+      return (StatusBar.currentHeight || 44) + 8;
+    }
+    
+    // For Android
+    const androidVersion = Platform.Version;
+    
+    if (androidVersion as number >= 30) { // Android 11+ (API 30)
+      // Android 15+ (API 35) would be androidVersion >= 35
+      // For edge-to-edge support on Android 11+
+      return (StatusBar.currentHeight || 24) + 8;
+    } else {
+      // For older Android versions
+      return (StatusBar.currentHeight || 24) + 4;
+    }
+  };
 
   const handleNotificationPress = () => {
     // Navigate to Notifications screen
@@ -41,7 +60,13 @@ const Header: React.FC<HeaderProps> = ({
       angle={50} 
       useAngle 
       colors={AppThemeGradient} 
-      style={[styles.header, { backgroundColor: 'rgba(240, 253, 252, 1)' }]}
+      style={[
+        styles.header, 
+        { 
+          backgroundColor: 'rgba(240, 253, 252, 1)',
+          paddingTop: getTopPadding(),
+        }
+      ]}
     >
       <View style={styles.headerTop}>
         <TouchableOpacity
@@ -63,13 +88,6 @@ const Header: React.FC<HeaderProps> = ({
             onPress={handleNotificationPress}
           >
             <Bell stroke="#1F2937" width={24} height={24} />
-            {notificationCount > 0 && (
-              <View style={styles.notificationBadge}>
-                <Text style={styles.badgeText}>
-                  {notificationCount > 99 ? '99+' : notificationCount}
-                </Text>
-              </View>
-            )}
           </TouchableOpacity>
         </View>
       </View>
@@ -80,7 +98,6 @@ const Header: React.FC<HeaderProps> = ({
 const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 20,
-    paddingTop: 14,
     paddingBottom: 8,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(0, 0, 0, 0.1)',

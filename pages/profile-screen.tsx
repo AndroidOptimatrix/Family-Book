@@ -65,7 +65,7 @@ const ProfileScreen: React.FC = () => {
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="light-content" backgroundColor="#4F46E5" />
             
-            <LinearHeader title='Profile' subtitle='Manage Your Profile' isProfile />
+            <LinearHeader title='Profile' subtitle='Manage Your Profile'  />
 
             <ScrollView 
                 style={styles.scrollView}
@@ -99,9 +99,9 @@ const ProfileScreen: React.FC = () => {
                                 <User stroke="#3B82F6" width={20} height={20} />
                             </View>
                             <Text style={styles.infoCardTitle}>Full Name</Text>
-                            <TouchableOpacity style={styles.editInfoButton}>
+                            {/* <TouchableOpacity style={styles.editInfoButton}>
                                 <Edit2 stroke="#6B7280" width={16} height={16} />
-                            </TouchableOpacity>
+                            </TouchableOpacity> */}
                         </View>
                         <Text style={styles.infoCardValue}>{username}</Text>
                     </View>
@@ -113,9 +113,9 @@ const ProfileScreen: React.FC = () => {
                                 <Phone stroke="#3B82F6" width={20} height={20} />
                             </View>
                             <Text style={styles.infoCardTitle}>Phone Number</Text>
-                            <TouchableOpacity style={styles.editInfoButton}>
+                            {/* <TouchableOpacity style={styles.editInfoButton}>
                                 <Edit2 stroke="#6B7280" width={16} height={16} />
-                            </TouchableOpacity>
+                            </TouchableOpacity> */}
                         </View>
                         <Text style={styles.infoCardValue}>{phoneNumber}</Text>
                     </View>

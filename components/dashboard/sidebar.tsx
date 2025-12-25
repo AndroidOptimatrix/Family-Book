@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     left: 0,
-    width: 300,
+    width: 280,
     height: '100%',
     backgroundColor: '#FFFFFF',
     zIndex: 1001,
@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
     elevation: 20,
   },
   sidebarHeader: {
-    paddingTop: 30,
+    paddingTop: 40,
     paddingBottom: 20,
     paddingHorizontal: 20,
   },

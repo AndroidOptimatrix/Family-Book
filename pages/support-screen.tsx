@@ -8,55 +8,15 @@ import {
   Linking,
   Alert,
   StyleSheet,
-  Dimensions,
 } from 'react-native';
 import {
   Mail,
   Phone,
   MessageCircle,
   Clock,
-  Info,
+  ChevronRight,
 } from 'react-native-feather';
 import LinearHeader from '../components/common/header';
-
-const { width } = Dimensions.get('window');
-
-interface SupportItemProps {
-  icon: React.ReactNode;
-  title: string;
-  subtitle: string;
-  action?: () => void;
-  actionText?: string;
-}
-
-const SupportItem: React.FC<SupportItemProps> = ({
-  icon,
-  title,
-  subtitle,
-  action,
-  actionText = 'Contact',
-}) => {
-  return (
-    <View style={styles.supportItem}>
-      <View style={styles.supportIconContainer}>
-        {icon}
-      </View>
-      <View style={styles.supportContent}>
-        <Text style={styles.supportTitle}>{title}</Text>
-        <Text style={styles.supportSubtitle}>{subtitle}</Text>
-      </View>
-      {action && (
-        <TouchableOpacity
-          style={styles.supportButton}
-          onPress={action}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.supportButtonText}>{actionText}</Text>
-        </TouchableOpacity>
-      )}
-    </View>
-  );
-};
 
 const SupportScreen: React.FC = () => {
   const supportEmail = 'support@familybook.com';
@@ -88,94 +48,80 @@ const SupportScreen: React.FC = () => {
     });
   };
 
-  const supportItems: SupportItemProps[] = [
+  const contactInfoItems = [
     {
-      icon: <Mail width={28} height={28} color="#4F46E5" />,
-      title: 'Email Support',
-      subtitle: 'Get detailed assistance via email',
+      id: 1,
+      icon: <Mail width={20} height={20} color="#4F46E5" />,
+      label: 'Email Address',
+      value: supportEmail,
       action: handleEmailPress,
-      actionText: 'Send Email',
+      actionIcon: <ChevronRight width={20} height={20} color="#4F46E5" />,
     },
     {
-      icon: <Phone width={28} height={28} color="#10B981" />,
-      title: 'Phone Support',
-      subtitle: 'Call us for immediate assistance',
+      id: 2,
+      icon: <Phone width={20} height={20} color="#10B981" />,
+      label: 'Phone Number',
+      value: supportPhone,
       action: handlePhonePress,
-      actionText: 'Call Now',
+      actionIcon: <ChevronRight width={20} height={20} color="#10B981" />,
     },
     {
-      icon: <MessageCircle width={28} height={28} color="#25D366" />,
-      title: 'WhatsApp',
-      subtitle: 'Quick chat support via WhatsApp',
+      id: 3,
+      icon: <MessageCircle width={20} height={20} color="#25D366" />,
+      label: 'WhatsApp',
+      value: 'Message us on WhatsApp',
       action: handleWhatsAppPress,
-      actionText: 'Message',
-    }
+      actionIcon: <ChevronRight width={20} height={20} color="#25D366" />,
+    },
+    {
+      id: 4,
+      icon: <Clock width={20} height={20} color="#6B7280" />,
+      label: 'Support Hours',
+      value: 'Phone: 9 AM - 6 PM (Mon-Sat)',
+      action: null,
+      actionIcon: null,
+    },
   ];
 
   return (
     <SafeAreaView style={styles.container}>
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContent}
-        >
-          <LinearHeader title='Support Center' subtitle='Were here to help you 24/7' />
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        <LinearHeader title="Support Center" />
 
-          {/* Contact Cards */}
-          <View style={styles.cardsContainer}>
-            {supportItems.map((item, index) => (
-              <SupportItem
-                key={index}
-                icon={item.icon}
-                title={item.title}
-                subtitle={item.subtitle}
-                action={item.action}
-                actionText={item.actionText}
-              />
+        {/* Contact Info Section with Icon Buttons */}
+        <View style={styles.contactInfoContainer}>
+          <Text style={styles.sectionTitle}>Contact Information</Text>
+          
+          <View style={styles.contactInfoCard}>
+            {contactInfoItems.map((item) => (
+              <View key={item.id} style={styles.contactInfoItem}>
+                <View style={styles.contactInfoLeft}>
+                  <View style={styles.contactInfoIconContainer}>
+                    {item.icon}
+                  </View>
+                  <View style={styles.contactInfoContent}>
+                    <Text style={styles.contactInfoLabel}>{item.label}</Text>
+                    <Text style={styles.contactInfoValue}>{item.value}</Text>
+                  </View>
+                </View>
+                
+                {item.action && (
+                  <TouchableOpacity
+                    style={styles.actionButton}
+                    onPress={item.action}
+                    activeOpacity={0.7}
+                  >
+                    {item.actionIcon}
+                  </TouchableOpacity>
+                )}
+              </View>
             ))}
           </View>
-
-          {/* Contact Info Section */}
-          <View style={styles.contactInfoContainer}>
-            <Text style={styles.sectionTitle}>Contact Information</Text>
-
-            <View style={styles.contactInfoCard}>
-              <View style={styles.contactInfoRow}>
-                <Mail width={20} height={20} color="#6B7280" />
-                <View style={styles.contactInfoContent}>
-                  <Text style={styles.contactInfoLabel}>Email Address</Text>
-                  <Text style={styles.contactInfoValue}>{supportEmail}</Text>
-                </View>
-              </View>
-
-              <View style={styles.contactInfoRow}>
-                <Phone width={20} height={20} color="#6B7280" />
-                <View style={styles.contactInfoContent}>
-                  <Text style={styles.contactInfoLabel}>Phone Number</Text>
-                  <Text style={styles.contactInfoValue}>{supportPhone}</Text>
-                </View>
-              </View>
-
-              <View style={styles.contactInfoRow}>
-                <Clock width={20} height={20} color="#6B7280" />
-                <View style={styles.contactInfoContent}>
-                  <Text style={styles.contactInfoLabel}>Support Hours</Text>
-                  <Text style={styles.contactInfoValue}>
-                    24/7 Email Support{'\n'}
-                    Phone: 9 AM - 6 PM (Mon-Sat)
-                  </Text>
-                </View>
-              </View>
-            </View>
-          </View>
-
-          {/* Footer Note */}
-          <View style={styles.footerNote}>
-            <Info width={20} height={20} color="#6B7280" />
-            <Text style={styles.footerNoteText}>
-              We typically respond within 24 hours. For urgent matters, please call us.
-            </Text>
-          </View>
-        </ScrollView>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -183,102 +129,20 @@ const SupportScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 0
-  },
-  gradientBackground: {
-    flex: 1,
+    backgroundColor: '#F9FAFB',
   },
   scrollContent: {
-  },
-  header: {
-    alignItems: 'center',
-    marginBottom: 30,
-    paddingTop: 10,
-  },
-  headerIconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
-    borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-  },
-  headerTitle: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#000000ff',
-    marginBottom: 8,
-  },
-  headerSubtitle: {
-    fontSize: 16,
-    color: 'rgba(22, 22, 22, 0.8)',
-    textAlign: 'center',
-  },
-  cardsContainer: {
-    marginBlock: 30,
-    paddingInline: 15
-  },
-  supportItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  supportIconContainer: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: 'rgba(79, 70, 229, 0.1)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  supportContent: {
-    flex: 1,
-  },
-  supportTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1F2937',
-    marginBottom: 4,
-  },
-  supportSubtitle: {
-    fontSize: 14,
-    color: '#6B7280',
-  },
-  supportButton: {
-    backgroundColor: '#4F46E5',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 12,
-    marginLeft: 12,
-  },
-  supportButtonText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '600',
+    paddingBottom: 40,
   },
   contactInfoContainer: {
     marginBottom: 30,
-    paddingInline: 15
+    paddingHorizontal: 15,
+    marginTop: 30,
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#080808ff',
+    color: '#080808',
     marginBottom: 16,
   },
   contactInfoCard: {
@@ -286,86 +150,99 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 20,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
   },
-  contactInfoRow: {
+  contactInfoItem: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: 20,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+  },
+  contactInfoLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  contactInfoIconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#F3F4F6',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
   },
   contactInfoContent: {
     flex: 1,
-    marginLeft: 16,
   },
   contactInfoLabel: {
     fontSize: 14,
     color: '#6B7280',
     marginBottom: 4,
+    fontWeight: '500',
   },
   contactInfoValue: {
     fontSize: 16,
     color: '#1F2937',
-    fontWeight: '500',
+    fontWeight: '600',
+    lineHeight: 22,
   },
-  quickActionsContainer: {
+  actionButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#F3F4F6',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 12,
+  },
+  helpGuideContainer: {
     marginBottom: 30,
+    paddingHorizontal: 15,
   },
-  quickActionsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  quickActionItem: {
-    width: (width - 60) / 2,
+  helpGuideCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
-    alignItems: 'center',
+    padding: 20,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
   },
-  quickActionIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  quickActionText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1F2937',
-    textAlign: 'center',
-  },
-  footerNote: {
+  helpStep: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 12,
-    padding: 16,
-    marginTop: 20,
+    marginBottom: 20,
   },
-  footerNoteText: {
-    flex: 1,
+  stepNumber: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#4F46E5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  stepNumberText: {
     fontSize: 14,
-    color: 'rgba(46, 46, 46, 0.8)',
-    marginLeft: 12,
-    lineHeight: 20,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
   },
+  stepContent: {
+    flex: 1,
+  },
+  stepTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1F2937',
+    marginBottom: 4,
+  }
 });
 
 export default SupportScreen;
