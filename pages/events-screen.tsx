@@ -94,9 +94,6 @@ const EventsScreen = () => {
                             style={styles.eventImage}
                             resizeMode="contain"
                         />
-                        <View style={styles.imageOverlay}>
-                            <Maximize2 stroke="#FFFFFF" width={20} height={20} />
-                        </View>
                     </TouchableOpacity>
                 ) : (
                     <View style={[styles.eventImage, styles.noImage]}>

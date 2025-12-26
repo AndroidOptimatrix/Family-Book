@@ -76,22 +76,7 @@ const AdvertisementScreen: React.FC = () => {
                     style={styles.adImage}
                     resizeMode="contain"
                 />
-                <View style={styles.imageOverlay}>
-                    <Maximize2 stroke="#FFFFFF" width={20} height={20} />
-                </View>
             </TouchableOpacity>
-            
-            {item.description && (
-                <View style={styles.adContent}>
-                    <Text style={styles.adDescription}>{item.description}</Text>
-                    {item.website && (
-                        <View style={styles.websiteRow}>
-                            <ExternalLink stroke="#3B82F6" width={16} height={16} />
-                            <Text style={styles.websiteText}>Visit Website</Text>
-                        </View>
-                    )}
-                </View>
-            )}
         </TouchableOpacity>
     );
 

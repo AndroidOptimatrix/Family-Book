@@ -12,6 +12,9 @@ import AdvertisementScreen from './pages/advertisement-screen';
 import VideoScreen from './pages/videos-screen';
 import ProfileScreen from './pages/profile-screen';
 import SupportScreen from './pages/support-screen';
+
+import 'react-native-gesture-handler';
+
 // import SupportScreen from './pages/support-screen';
 
 type RootStackParamList = {

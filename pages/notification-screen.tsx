@@ -113,9 +113,6 @@ const NotificationScreen: React.FC = () => {
                             style={styles.notificationImage}
                             resizeMode="contain"
                         />
-                        <View style={styles.imageOverlay}>
-                            <Maximize2 stroke="#FFFFFF" width={24} height={24} />
-                        </View>
                     </TouchableOpacity>
                 ) : (
                     <View style={styles.placeholderImage}>
