@@ -463,10 +463,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F8FAFC',
-    paddingBottom: DevicePlatform.OS == 'android' ? 30 : 0
   },
   mainContent: {
-    flex: 1,
+    paddingBottom: DevicePlatform.OS == 'android' ? 30 : 0,
+    flex: 1
   },
   mainContentBlur: {
     opacity: 0.7,
