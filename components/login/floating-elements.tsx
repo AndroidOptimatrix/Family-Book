@@ -6,7 +6,7 @@ const FloatingElements: React.FC = () => {
     <>
       <View style={styles.floatingCircle1} />
       <View style={styles.floatingCircle2} />
-      <View style={styles.floatingCircle3} />
+      {/* <View style={styles.floatingCircle3} /> */}
     </>
   );
 };

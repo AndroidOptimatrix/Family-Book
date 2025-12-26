@@ -27,7 +27,7 @@ interface SplashScreenProps {
 
 const SplashScreen: React.FC<SplashScreenProps> = ({
   onAnimationComplete,
-  logoSource = require('../logo-2.png'),
+  logoSource = require('../vertical-logo.png'),
   appName = 'Family Book',
   tagline = 'Where Memories Live Forever',
   version = 'Version 1.0.0',
@@ -35,44 +35,54 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
 }) => {
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const scaleAnim = useRef(new Animated.Value(0.3)).current;
-  const rotateAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(1.5)).current; // Start zoomed in
   const textAnim = useRef(new Animated.Value(0)).current;
   const progressAnim = useRef(new Animated.Value(0)).current;
+  const zoomOutAnim = useRef(new Animated.Value(0)).current; 
 
   useEffect(() => {
-    const animationDuration = 1800;
+    const animationDuration = 2000;
 
     // Start all animations
     Animated.parallel([
       Animated.sequence([
+        // Fade in
         Animated.timing(fadeAnim, {
           toValue: 1,
-          duration: 800,
+          duration: 600,
           easing: Easing.out(Easing.cubic),
           useNativeDriver: true,
         }),
+        
+        // Zoom out animation sequence
         Animated.parallel([
+          // Main zoom out animation
           Animated.timing(scaleAnim, {
-            toValue: 1.0,
+            toValue: 1.0, // Zoom out to normal size
             duration: 1200,
-            easing: Easing.elastic(1.2),
+            easing: Easing.out(Easing.cubic),
             useNativeDriver: true,
           }),
-          Animated.timing(rotateAnim, {
+          
+          // Additional zoom out effect for smoothness
+          Animated.timing(zoomOutAnim, {
             toValue: 1,
             duration: 1200,
             easing: Easing.out(Easing.cubic),
             useNativeDriver: true,
           }),
         ]),
+        
+        // Show text after zoom out
         Animated.timing(textAnim, {
           toValue: 1,
-          duration: 800,
+          duration: 600,
           easing: Easing.out(Easing.cubic),
           useNativeDriver: true,
         }),
       ]),
+      
+      // Progress bar animation
       Animated.timing(progressAnim, {
         toValue: 1,
         duration: animationDuration,
@@ -87,11 +97,24 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
     }, animationDuration);
 
     return () => clearTimeout(timer);
-  }, [fadeAnim, scaleAnim, rotateAnim, textAnim, progressAnim, onAnimationComplete]);
+  }, [fadeAnim, scaleAnim, textAnim, progressAnim, zoomOutAnim, onAnimationComplete]);
 
-  const rotateInterpolate = rotateAnim.interpolate({
+  // Glow effect opacity that fades in and out during zoom
+  const glowOpacity = zoomOutAnim.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [0.3, 0.5, 0.15],
+  });
+
+  // Subtle glow scale effect during zoom out
+  const glowScale = zoomOutAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['0deg', '360deg'],
+    outputRange: [1.2, 1.0],
+  });
+
+  // Additional bounce effect at the end of zoom
+  const bounceEffect = zoomOutAnim.interpolate({
+    inputRange: [0, 0.8, 0.9, 1],
+    outputRange: [0, 0, 0.05, 0],
   });
 
   const progressWidth = progressAnim.interpolate({
@@ -120,20 +143,28 @@ const SplashScreen: React.FC<SplashScreenProps> = ({
       <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
         {/* Logo container */}
         <View style={styles.logoWrapper}>
+          {/* Glow effect with zoom animation */}
+          <Animated.View
+            style={[
+              styles.glowEffect,
+              {
+                transform: [{ scale: glowScale }],
+                opacity: glowOpacity,
+              }
+            ]}
+          />
+
           <Animated.View
             style={[
               styles.logoContainer,
               {
                 transform: [
                   { scale: scaleAnim },
-                  { rotate: rotateInterpolate },
+                  { scale: Animated.add(1, bounceEffect) }, // Add subtle bounce
                 ],
               }
             ]}
           >
-            {/* Glow effect */}
-            <View style={styles.glowEffect} />
-
             {/* Logo Image */}
             <Image
               source={logoSource}
@@ -201,6 +232,8 @@ const styles = StyleSheet.create({
   logoWrapper: {
     position: 'relative',
     marginBottom: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   logoContainer: {
     width: 160,
@@ -216,6 +249,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 20,
     elevation: 15,
+    zIndex: 2,
   },
   logo: {
     width: 110,
@@ -228,7 +262,7 @@ const styles = StyleSheet.create({
     height: 180,
     borderRadius: 90,
     backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    zIndex: -1,
+    zIndex: 1,
   },
   ring: {
     position: 'absolute',

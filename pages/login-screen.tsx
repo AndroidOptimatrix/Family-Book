@@ -1,4 +1,3 @@
-// screens/LoginScreen.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import {
   SafeAreaView,
@@ -139,17 +138,14 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
   };
 
   const getFormattedPhoneForDisplay = () => {
-    // Use userPhone from auth context if available, otherwise use local phoneNumber
     const phoneToUse = userPhone || phoneNumber;
     
     if (!phoneToUse) {
       return '';
     }
     
-    // Remove any non-digit characters first
     let cleanPhone = phoneToUse.replace(/\D/g, '');
     
-    // If phone starts with country code (like 91), remove it to get just the number
     if (cleanPhone.startsWith(countryCallingCode) && cleanPhone.length > 10) {
       cleanPhone = cleanPhone.substring(countryCallingCode.length);
     }
@@ -291,7 +287,7 @@ const styles = StyleSheet.create({
     minHeight: height,
   },
   scrollContentKeyboardOpen: {
-    paddingBottom: 100, // Extra space when keyboard is open
+    paddingBottom: 100, 
     justifyContent: 'flex-start',
   },
   content: {

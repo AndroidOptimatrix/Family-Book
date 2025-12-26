@@ -152,8 +152,8 @@ const VideoScreen: React.FC = () => {
 
                 {/* Video Info */}
                 <View style={styles.videoInfo}>
-                    <Text style={styles.videoTitle} numberOfLines={2}>
-                        {truncateTitle(item.title, 60)}
+                    <Text style={styles.videoTitle} >
+                        {item.title}
                     </Text>
 
                     <View style={styles.dateRow}>

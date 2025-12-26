@@ -209,13 +209,13 @@ const LoginForm: React.FC<LoginFormProps> = ({
     };
 
     return (
-        <TouchableOpacity 
-          activeOpacity={1} 
-          onPress={handleFormPress}
-          style={[
-            styles.formContainer, 
-            keyboardVisible && styles.containerKeyboardOpen
-          ]}
+        <TouchableOpacity
+            activeOpacity={1}
+            onPress={handleFormPress}
+            style={[
+                styles.formContainer,
+                keyboardVisible && styles.containerKeyboardOpen
+            ]}
         >
             <View ref={formRef}>
                 {!otpSent ? (
@@ -265,7 +265,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
                 ) : (
                     <View style={styles.otpContainer}>
                         <View style={styles.otpHeader}>
-                            <Image source={require('../../whatsapp.png')} style={{ width: 36, height: 36 }} />
+                            <Image source={require('../../whatsapp.png')} style={{ width: 28, height: 28 }} />
                             <Text style={styles.otpTitle}>Enter OTP</Text>
                         </View>
                         <Text style={styles.otpSubtitle}>
@@ -350,7 +350,7 @@ const styles = StyleSheet.create({
     },
     containerKeyboardOpen: {
         marginTop: Platform.OS === 'ios' ? -50 : -20,
-        marginBottom: 20,
+        marginBottom: 20
     },
     inputGroup: {
         marginBottom: 24,
@@ -364,8 +364,7 @@ const styles = StyleSheet.create({
     inputText: {
         display: 'flex',
         gap: 5,
-        flexDirection: 'row',
-        alignItems: 'center',
+        flexDirection: 'row'
     },
     inputContainer: {
         flexDirection: 'row',
@@ -425,22 +424,21 @@ const styles = StyleSheet.create({
         marginBottom: 12,
     },
     otpTitle: {
-        fontSize: 18,
+        fontSize: 15,
         fontWeight: 'bold',
         color: '#1F2937',
     },
     otpSubtitle: {
-        fontSize: 14,
+        fontSize: 12,
         color: '#6B7280',
-        marginBottom: 24,
+        marginBottom: 12,
         textAlign: 'center',
-        lineHeight: 20,
+        lineHeight: 14,
     },
     otpActions: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 12,
-        marginTop: 16,
     },
     resendText: {
         fontSize: 14,

@@ -107,7 +107,7 @@ const EventsScreen = () => {
                 {/* Event Content */}
                 <View style={styles.eventContent}>
                     {/* Event Title */}
-                    <Text style={styles.eventTitle} numberOfLines={1}>
+                    <Text style={styles.eventTitle} >
                         {item.title || 'Untitled Event'}
                     </Text>
 
@@ -115,7 +115,7 @@ const EventsScreen = () => {
                     {item.date && (
                         <View style={styles.eventDetailRow}>
                             <Calendar width={16} height={16} stroke="#666" />
-                            <Text style={styles.eventDetailText} numberOfLines={1}>
+                            <Text style={styles.eventDetailText} >
                                 {formatEventDate(item.date)}
                             </Text>
                         </View>
@@ -125,7 +125,7 @@ const EventsScreen = () => {
                     {item.time && (
                         <View style={styles.eventDetailRow}>
                             <Clock width={16} height={16} stroke="#666" />
-                            <Text style={styles.eventDetailText} numberOfLines={1}>
+                            <Text style={styles.eventDetailText} >
                                 {item.time}
                             </Text>
                         </View>
@@ -135,7 +135,7 @@ const EventsScreen = () => {
                     {item.place && (
                         <View style={styles.eventDetailRow}>
                             <MapPin width={16} height={16} stroke="#666" />
-                            <Text style={styles.eventDetailText} numberOfLines={1}>
+                            <Text style={styles.eventDetailText} >
                                 {item.place}
                             </Text>
                         </View>
@@ -143,7 +143,7 @@ const EventsScreen = () => {
 
                     {/* Event Description */}
                     {item.description && (
-                        <Text style={styles.eventDescription} numberOfLines={3}>
+                        <Text style={styles.eventDescription}>
                             {stripHTML(item.description)}
                         </Text>
                     )}
@@ -224,14 +224,14 @@ const styles = StyleSheet.create({
         flexGrow: 1,
     },
     eventCard: {
-        backgroundColor: '#fff',
+        backgroundColor: '#F3F4F6',
         borderRadius: 12,
         overflow: 'hidden',
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 8,
-        elevation: 3,
+        elevation: 3
     },
     imageTouchable: {
         position: 'relative',
@@ -262,6 +262,7 @@ const styles = StyleSheet.create({
     },
     eventContent: {
         padding: 16,
+        backgroundColor: '#fff'
     },
     eventTitle: {
         fontSize: 18,

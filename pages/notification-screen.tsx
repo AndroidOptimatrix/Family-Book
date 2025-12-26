@@ -124,12 +124,12 @@ const NotificationScreen: React.FC = () => {
                 )}
 
                 <View style={styles.contentContainer}>
-                    <Text style={styles.notificationTitle} numberOfLines={2}>
+                    <Text style={styles.notificationTitle}>
                         {item.title}
                     </Text>
 
                     {item.description ? (
-                        <Text style={styles.notificationDescription} numberOfLines={3}>
+                        <Text style={styles.notificationDescription}>
                             {item.description}
                         </Text>
                     ) : null}
