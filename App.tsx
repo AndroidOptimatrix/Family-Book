@@ -82,9 +82,7 @@ const AppContent: React.FC = () => {
             setSplashVisible(false);
           }
         }}
-        logoSource={require('./logo-2.png')}
-        appName="Family Book"
-        tagline="Connecting Families"
+        logoSource={require('./vertical-logo.png')}
       />
     );
   }
