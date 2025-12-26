@@ -11,6 +11,7 @@ import {
   Animated,
   RefreshControl,
   TouchableWithoutFeedback,
+  Platform as DevicePlatform,
 } from 'react-native';
 import {
   Bell,
@@ -74,12 +75,10 @@ const DashboardScreen: React.FC = () => {
 
   const { loading, socialMedia } = useSocialMedia();
 
-  // Map social media platforms from API to Platform type
   const followPlatforms: Platform[] = socialMedia.map((item) => {
     const platformName = item.plateform.toLowerCase();
 
-    // Determine icon based on platform name
-    let IconComponent = Globe; // Default icon
+    let IconComponent = Globe;
 
     if (platformName.includes('facebook')) {
       IconComponent = Facebook;
@@ -96,7 +95,7 @@ const DashboardScreen: React.FC = () => {
     }
 
     // Determine gradient based on platform name
-    let gradient = ['#3B82F6', '#1E40AF']; // Default gradient
+    let gradient = ['#3B82F6', '#1E40AF'];
 
     if (platformName.includes('facebook')) {
       gradient = ['#1877F2', '#0A5BC4'];
@@ -248,7 +247,6 @@ const DashboardScreen: React.FC = () => {
     },
   ];
 
-  // Functions
   const openSidebar = () => {
     setSidebarVisible(true);
     Animated.timing(sidebarAnim, {
@@ -271,26 +269,22 @@ const DashboardScreen: React.FC = () => {
   const handleMenuItemPress = (item: MenuItem) => {
     closeSidebar();
 
-    // Check if screen is empty (not ready)
     if (!item.screen) {
       setComingSoonFeature(item.title);
       setShowComingSoon(true);
       return;
     }
 
-    // Navigate to the screen if it exists
     navigation.navigate(item.screen as keyof DashboardStackParamList);
   };
 
   const handleGridItemPress = (item: GridItemType) => {
-    // Check if screen is empty or not ready
     if (!item.screen) {
       setComingSoonFeature(item.title);
       setShowComingSoon(true);
       return;
     }
 
-    // Navigate to the screen
     navigation.navigate(item.screen as keyof DashboardStackParamList);
   };
 
@@ -298,7 +292,6 @@ const DashboardScreen: React.FC = () => {
     closeSidebar();
     try {
       await logout();
-      // Navigation back to login will be handled by App.tsx based on auth state
     } catch (error: any) {
       console.error('Logout error:', error);
     }
@@ -470,6 +463,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F8FAFC',
+    paddingBottom: DevicePlatform.OS == 'android' ? 30 : 0
   },
   mainContent: {
     flex: 1,

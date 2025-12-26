@@ -8,6 +8,7 @@ import {
   Linking,
   Alert,
   StyleSheet,
+  Platform,
 } from 'react-native';
 import {
   Mail,
@@ -130,6 +131,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F9FAFB',
+    paddingBottom: Platform.OS == 'android' ? 30 : 0
   },
   scrollContent: {
     paddingBottom: 40,

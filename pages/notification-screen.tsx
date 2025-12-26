@@ -10,12 +10,13 @@ import {
     RefreshControl,
     ActivityIndicator,
     Animated,
+    Platform,
 } from 'react-native';
 import LinearHeader from '../components/common/header';
 import useNotifications from '../hooks/useNotifications';
 import { Notification } from '../types/notification.types';
 import ImageViewerModal from '../components/common/image-viewer-modal';
-import { Bell, Calendar, Heart, Maximize2 } from 'react-native-feather';
+import { Bell, Calendar, Heart } from 'react-native-feather';
 
 const NotificationScreen: React.FC = () => {
     const {
@@ -253,6 +254,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#F9FAFB',
+        paddingBottom: Platform.OS == 'android' ? 30 : 0
     },
     backButton: {
         padding: 8,

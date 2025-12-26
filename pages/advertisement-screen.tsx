@@ -11,6 +11,7 @@ import {
     ActivityIndicator,
     Dimensions,
     Linking,
+    Platform,
 } from 'react-native';
 import { Image as ImageIcon, ExternalLink, Maximize2 } from 'react-native-feather';
 import LinearHeader from '../components/common/header';
@@ -156,6 +157,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#F9FAFB',
+        paddingBottom: Platform.OS == 'android' ? 30 : 0
     },
     loadingContainer: {
         flex: 1,

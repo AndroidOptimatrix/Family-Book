@@ -10,10 +10,11 @@ import {
     RefreshControl,
     SafeAreaView,
     Animated,
+    Platform,
 } from 'react-native';
 import useEvents from '../hooks/useEvents';
 import { Event } from '../types/event.types';
-import { Calendar, MapPin, Clock, Maximize2 } from 'react-native-feather';
+import { Calendar, MapPin, Clock } from 'react-native-feather';
 import LinearHeader from '../components/common/header';
 import ImageViewerModal from '../components/common/image-viewer-modal';
 
@@ -213,6 +214,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#f5f5f5',
+        paddingBottom: Platform.OS == 'android' ? 30 : 0
     },
     listContent: {
         paddingHorizontal: 16,

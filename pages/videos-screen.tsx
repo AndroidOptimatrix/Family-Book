@@ -12,6 +12,7 @@ import {
     Dimensions,
     Linking,
     Alert,
+    Platform,
 } from 'react-native';
 import { ArrowLeft, Calendar, Youtube } from 'react-native-feather';
 import LinearGradient from 'react-native-linear-gradient';
@@ -257,6 +258,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#F9FAFB',
+        paddingBottom: Platform.OS == 'android' ? 30 : 0
     },
     backButton: {
         padding: 8,

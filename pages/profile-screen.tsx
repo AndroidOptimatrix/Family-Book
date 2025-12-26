@@ -8,6 +8,7 @@ import {
     TouchableOpacity,
     StatusBar,
     Dimensions,
+    Platform
 } from 'react-native';
 import { useAuth } from '../context/auth-context';
 import { User, Phone, Shield, Edit2, Camera, LogOut, Star, Award, Calendar } from 'react-native-feather';
@@ -140,6 +141,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#F9FAFB',
+        paddingBottom: Platform.OS == 'android' ? 30 : 0
     },
     scrollView: {
         flex: 1,
