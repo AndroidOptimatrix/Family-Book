@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   View,
-  Text,
   TouchableOpacity,
   Image,
   StyleSheet,
@@ -40,14 +39,13 @@ const Header: React.FC<HeaderProps> = ({
     // For Android
     const androidVersion = Platform.Version;
     
-    if (androidVersion as number >= 30) { // Android 11+ (API 30)
-      // Android 15+ (API 35) would be androidVersion >= 35
-      // For edge-to-edge support on Android 11+
-      return (StatusBar.currentHeight || 24) + 8;
-    } else {
-      // For older Android versions
-      return (StatusBar.currentHeight || 24) + 4;
+    // For Android 11 and older (API 30 and below)
+    if (typeof androidVersion === 'number' && androidVersion <= 30) {
+      return 12; 
     }
+    
+    // For Android 12+ (API 31+) with edge-to-edge
+    return (StatusBar.currentHeight || 24) + 8;
   };
 
   const handleNotificationPress = () => {
@@ -160,7 +158,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 4,
     borderWidth: 2,
-    borderColor: 'rgba(240, 253, 252, 1)', // Match gradient background
+    borderColor: 'rgba(240, 253, 252, 1)',
   },
   badgeText: {
     fontSize: 10,

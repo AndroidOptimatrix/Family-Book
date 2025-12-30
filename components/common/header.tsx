@@ -15,11 +15,13 @@ import { useNavigation } from '@react-navigation/native'
 const LinearHeader = ({ 
   title, 
   subtitle, 
-  isProfile 
+  isProfile,
+  openProfile 
 }: { 
   title: string, 
   subtitle?: string, 
-  isProfile?: boolean 
+  isProfile?: boolean,
+  openProfile?: () => void
 }) => {
   const navigation = useNavigation();
 
@@ -30,20 +32,18 @@ const LinearHeader = ({
       return statusBarHeight + 8;
     }
     
-    // Android
+    // Android: Handle different versions properly
     const androidVersion = Platform.Version;
-    const statusBarHeight = StatusBar.currentHeight || 24;
     
-    if (androidVersion as number >= 35) {
-      // Android 15+ (API 35+) - Edge-to-edge support
-      return statusBarHeight + 12;
-    } else if (androidVersion as number >= 30) {
-      // Android 11-14 (API 30-34) - Edge-to-edge support
-      return statusBarHeight + 8;
-    } else {
-      // Older Android versions (pre-11)
-      return statusBarHeight + 4;
+    // For Android 11 and older (API 30 and below)
+    if (typeof androidVersion === 'number' && androidVersion <= 30) {
+      // Older Android versions have system status bar area
+      // Use smaller fixed value
+      return 12; // Reduced from 24+8=32 to just 12
     }
+    
+    // Android 12+ (API 31+): Edge-to-edge support
+    return (StatusBar.currentHeight || 24) + 8;
   };
 
   return (
@@ -72,7 +72,7 @@ const LinearHeader = ({
         {isProfile && (
           <TouchableOpacity
             style={styles.editButton}
-            onPress={() => console.log('Edit profile')}
+            onPress={openProfile}
           >
             <Edit2 stroke="#222222" width={20} height={20} />
           </TouchableOpacity>
@@ -97,7 +97,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: Platform.OS === 'ios' ? 0 : 4,
   },
   backButton: {
     width: 40,
