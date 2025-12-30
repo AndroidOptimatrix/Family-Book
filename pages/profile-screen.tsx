@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     View,
     Text,
@@ -7,17 +7,17 @@ import {
     ScrollView,
     TouchableOpacity,
     StatusBar,
-    Dimensions,
-    Platform
+    Platform,
+    Modal
 } from 'react-native';
 import { useAuth } from '../context/auth-context';
-import { User, Phone, Shield, Edit2, Camera, LogOut, Star, Award, Calendar } from 'react-native-feather';
 import LinearHeader from '../components/common/header';
-
-const { width } = Dimensions.get('window');
+import { User, Phone, LogOut } from 'react-native-feather';
+import EditProfileModal from '../components/overlays/edit-profile.modal';
 
 const ProfileScreen: React.FC = () => {
     const { userInfo, logout } = useAuth();
+    const [openModal, setOpenModal] = useState<boolean>(false)
 
     // Format phone number
     const formatPhoneNumber = (phone: string | null | undefined): string => {
@@ -39,49 +39,34 @@ const ProfileScreen: React.FC = () => {
     // Get user data
     const username = userInfo?.user_name || userInfo?.name || 'User';
     const phoneNumber = formatPhoneNumber(userInfo?.mobile);
-    
+
     // Get first character for avatar
     const getFirstCharacter = (name: string): string => {
         return name.charAt(0).toUpperCase();
     };
 
-    // Generate gradient colors based on name
-    const getGradientColors = (name: string): [string, string] => {
-        const gradients: [string, string][] = [
-            ['#667eea', '#764ba2'], // Purple gradient
-            ['#f093fb', '#f5576c'], // Pink gradient
-            ['#4facfe', '#00f2fe'], // Blue gradient
-            ['#43e97b', '#38f9d7'], // Green gradient
-            ['#fa709a', '#fee140'], // Orange gradient
-            ['#a8edea', '#fed6e3'], // Pastel gradient
-        ];
-        const hash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-        return gradients[hash % gradients.length];
-    };
-
     const avatarChar = getFirstCharacter(username);
-    const gradientColors = getGradientColors(username);
 
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="light-content" backgroundColor="#4F46E5" />
-            
-            <LinearHeader title='Profile' subtitle='Manage Your Profile'  />
 
-            <ScrollView 
+            <LinearHeader title='Profile' subtitle='Manage Your Profile' isProfile openProfile={() => setOpenModal(true)} />
+
+            <ScrollView
                 style={styles.scrollView}
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.scrollContent}
             >
                 {/* Avatar Floating Card */}
                 <View style={styles.avatarCard}>
-                    
+
                     {/* Avatar Content */}
                     <View style={styles.avatarContent}>
                         <View style={styles.avatarCircle}>
                             <Text style={styles.avatarText}>{avatarChar}</Text>
                         </View>
-                        
+
                         <View style={styles.avatarInfo}>
                             <Text style={styles.userName}>{username}</Text>
                             <Text style={styles.userStatus}>{phoneNumber}</Text>
@@ -92,7 +77,7 @@ const ProfileScreen: React.FC = () => {
                 {/* Information Section */}
                 <View style={styles.infoSection}>
                     <Text style={styles.sectionTitle}>Personal Information</Text>
-                    
+
                     {/* Name Card */}
                     <View style={styles.infoCard}>
                         <View style={styles.infoCardHeader}>
@@ -106,7 +91,7 @@ const ProfileScreen: React.FC = () => {
                         </View>
                         <Text style={styles.infoCardValue}>{username}</Text>
                     </View>
-                    
+
                     {/* Phone Card */}
                     <View style={styles.infoCard}>
                         <View style={styles.infoCardHeader}>
@@ -125,7 +110,7 @@ const ProfileScreen: React.FC = () => {
             </ScrollView>
 
             {/* Bottom Logout Button */}
-            <TouchableOpacity 
+            <TouchableOpacity
                 style={styles.logoutButton}
                 onPress={() => logout()}
                 activeOpacity={0.8}
@@ -133,6 +118,25 @@ const ProfileScreen: React.FC = () => {
                 <LogOut stroke="#DC2626" width={20} height={20} />
                 <Text style={styles.logoutText}>Logout</Text>
             </TouchableOpacity>
+
+
+            {/* EditProfleModal */}
+
+            <Modal
+                visible={openModal}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setOpenModal(false)}
+            >
+                <EditProfileModal
+                    onClose={() => setOpenModal(false)}
+                    onSuccess={() => {
+                        // Refresh your user info here if needed
+                        console.log('Profile updated successfully');
+                    }}
+                />
+            </Modal>
+
         </SafeAreaView>
     );
 };
