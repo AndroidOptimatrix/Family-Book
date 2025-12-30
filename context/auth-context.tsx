@@ -7,6 +7,7 @@ interface UserInfo {
     id: string;
     user_name?: string;
     mobile?: string;
+    user_id?: string;
     [key: string]: any;
 }
 
@@ -20,6 +21,7 @@ interface AuthContextType {
     verifyOtp: (mobile: string, otp: string) => Promise<ApiResponse>;
     completeProfile: (name: string) => Promise<ApiResponse>;
     logout: () => Promise<void>;
+    updateUserInfo: (updatedInfo: Partial<UserInfo>) => Promise<void>;
     clearRegistrationRequirement: () => void;
 }
 
@@ -269,7 +271,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
             const params = {
                 type: 'login_otp',
                 user_id: userId,
-                otp_code: otp, // API expects otp_code parameter
+                otp_code: otp,
             };
 
             const data = await makeApiCall('', params);
@@ -315,13 +317,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
 
             console.log('📝 Step 1: Completing profile for user_id:', userId, 'with name:', name);
 
-            // Extract just the mobile number without country code for API
             let mobileNumber = userPhone || '';
             if (mobileNumber) {
-                // Remove any non-digit characters
                 mobileNumber = mobileNumber.replace(/\D/g, '');
                 // Remove country code if present (e.g., "918141561118" -> "8141561118")
-                // Assuming country code is 2 digits (91 for India)
                 if (mobileNumber.length > 10 && mobileNumber.startsWith('91')) {
                     mobileNumber = mobileNumber.substring(2);
                 }
@@ -442,6 +441,33 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         }
     };
 
+    // updaete user info in state
+    const updateUserInfo = async (updatedInfo: Partial<UserInfo>): Promise<void> => {
+        try {
+            if (!userInfo) {
+                throw new Error('No user info available to update');
+            }
+
+            const newUserInfo = {
+                ...userInfo,
+                ...updatedInfo
+            };
+
+            console.log('Updating user info in AsyncStorage:', newUserInfo);
+
+            // Update AsyncStorage
+            await storage.setItem('@user_info', newUserInfo);
+
+            // Update state
+            setUserInfo(newUserInfo);
+
+            console.log('✅ User info updated successfully in AsyncStorage');
+        } catch (error) {
+            console.error('🔥 Error updating user info:', error);
+            throw error;
+        }
+    };
+
     const value: AuthContextType = {
         isAuthenticated,
         isLoading,
@@ -452,6 +478,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         verifyOtp,
         completeProfile,
         logout,
+        updateUserInfo,
         clearRegistrationRequirement
     };
 
