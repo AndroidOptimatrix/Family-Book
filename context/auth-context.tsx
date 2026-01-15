@@ -18,7 +18,7 @@ interface AuthContextType {
     userInfo: UserInfo | null;
     userPhone: string | null;
     sendOtp: (mobile: string, country_code: string) => Promise<ApiResponse>;
-    verifyOtp: (mobile: string, otp: string) => Promise<ApiResponse>;
+    verifyOtp: (mobile: string, otp: string, isRegistering?: boolean) => Promise<ApiResponse>;
     completeProfile: (name: string) => Promise<ApiResponse>;
     logout: () => Promise<void>;
     updateUserInfo: (updatedInfo: Partial<UserInfo>) => Promise<void>;
@@ -190,9 +190,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
 
     // Verify OTP function
     // In your verifyOtp function in auth-context.tsx:
-    const verifyOtp = async (mobile: string, otp: string): Promise<ApiResponse> => {
+    const verifyOtp = async (mobile: string, otp: string, isRegistering?: boolean): Promise<ApiResponse> => {
         try {
             setIsLoading(true);
+
+            // Get the stored model_open value
+            const modelOpen = await storage.getItem('@model_open');
 
             if (!userId) {
                 throw new Error('Invalid User ID. Please try sending OTP again.');
@@ -205,6 +208,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
                 type: 'verify_otp_register',
                 user_id: userId,
                 otp: otp,
+                isRegistering: modelOpen === true ? 'true' : 'false',
             };
 
             const data = await makeApiCall('', params);
@@ -215,9 +219,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
                 if (firstItem.result === 'success') {
                     // Store basic authentication
                     await storage.setItem('@authenticated', true);
-
-                    // Get the stored model_open value
-                    const modelOpen = await storage.getItem('@model_open');
 
                     // Store user info for background login
                     await storage.setItem('@user_info', {
