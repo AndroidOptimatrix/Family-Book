@@ -1,15 +1,18 @@
-// GridItem.tsx
+// GridItem.tsx - Updated for full width horizontal cards
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Platform } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { GridItem as GridItemType } from '../../types/dashboard.types';
 
 interface GridItemProps {
   item: GridItemType;
   onPress?: () => void;
+  flex?: boolean;
 }
 
-const GridItem: React.FC<GridItemProps> = ({ item, onPress }) => {
+const DevicePlatform = Platform;
+
+const GridItem: React.FC<GridItemProps> = ({ item, onPress, flex = false }) => {
   const Icon = item.icon;
   
   return (
@@ -20,17 +23,30 @@ const GridItem: React.FC<GridItemProps> = ({ item, onPress }) => {
     >
       <View style={[styles.container, { backgroundColor: item.gradient }]}>
         <View style={styles.content}>
+          {/* Icon with Gradient Background */}
           <LinearGradient
             style={styles.iconContainer}
             colors={item.icon_bg}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
           >
-            <Icon stroke="#fff" width={22} height={22} />
+            <Icon stroke="#fff" width={24} height={24} />
           </LinearGradient>
-          <Text style={styles.title} numberOfLines={2}>
-            {item.title}
-          </Text>
+          
+          {/* Text Content */}
+          <View style={styles.textContainer}>
+            <Text style={styles.englishTitle} numberOfLines={1}>
+              {item.title}
+            </Text>
+            <Text style={styles.gujaratiTitle} numberOfLines={1}>
+              {item.gujTitle}
+            </Text>
+          </View>
+          
+          {/* Arrow Indicator */}
+          <View style={styles.arrowContainer}>
+            <Text style={styles.arrow}>›</Text>
+          </View>
         </View>
       </View>
     </TouchableOpacity>
@@ -38,47 +54,61 @@ const GridItem: React.FC<GridItemProps> = ({ item, onPress }) => {
 };
 
 const { width } = Dimensions.get('window');
-const SCREEN_PADDING = 30; 
-const GAP = 12; 
-const NUM_COLUMNS = 3;
-const CARD_WIDTH = (width - SCREEN_PADDING - (GAP * (NUM_COLUMNS - 1))) / NUM_COLUMNS;
+const SCREEN_PADDING = 30; // 15 padding on each side
 
 const styles = StyleSheet.create({
   touchableContainer: {
-    width: CARD_WIDTH,
+    width: width - SCREEN_PADDING,
+    alignSelf: 'center',
   },
   container: {
     width: '100%',
-    height:100, // Make it square (or adjust ratio)
+    height: 80,
     borderRadius: 12,
-    elevation: 0,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.1,
     shadowRadius: 4,
     borderWidth: 0.5,
     borderColor: 'rgba(0, 0, 0, 0.05)',
   },
   content: {
     flex: 1,
-    padding: 12,
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 15,
   },
   iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 8,
+    marginRight: 15,
   },
-  title: {
-    fontSize: 13,
+  textContainer: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  englishTitle: {
+    fontSize: 16,
     fontWeight: '600',
     color: '#1F2937',
-    textAlign: 'center',
-    lineHeight: 16,
+    marginBottom: 4,
+  },
+  gujaratiTitle: {
+    fontSize: 14,
+    color: '#4B5563',
+    fontFamily: DevicePlatform.OS === 'android' ? 'sans-serif' : 'System', // You might want to use a Gujarati font
+  },
+  arrowContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 30,
+  },
+  arrow: {
+    fontSize: 24,
+    color: '#6B7280',
+    fontWeight: 'bold',
   },
 });
 
