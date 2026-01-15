@@ -55,6 +55,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
     const [buttonScale] = useState(new Animated.Value(1));
     const formRef = useRef<View>(null);
     const phoneInputRef = useRef<TextInput>(null);
+    const [isRegistering, setIsRegistering] = useState(false);
 
     useEffect(() => {
         let interval: number | null = null;
@@ -141,7 +142,8 @@ const LoginForm: React.FC<LoginFormProps> = ({
         }
 
         try {
-            await sendOtp(phoneNumber, countryCallingCode);
+            const response = await sendOtp(phoneNumber, countryCallingCode);
+            if (response.DATA[0].register == 'true') { setIsRegistering(true); }
             setOtpSent(true);
             setResendTimer(30);
             setCanResend(false);
@@ -159,7 +161,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
     const handleVerifyOtp = async () => {
         try {
             const fullPhone = `${countryCallingCode}${phoneNumber}`;
-            await verifyOtp(fullPhone, otp);
+            await verifyOtp(fullPhone, otp, isRegistering);
             // Success will be handled by AuthContext
             // Dismiss keyboard after verification
             Keyboard.dismiss();
