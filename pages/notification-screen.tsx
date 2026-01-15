@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useRef } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -9,14 +9,39 @@ import {
     TouchableOpacity,
     RefreshControl,
     ActivityIndicator,
-    Animated,
     Platform,
+    Dimensions,
+    ImageURISource,
 } from 'react-native';
 import LinearHeader from '../components/common/header';
 import useNotifications from '../hooks/useNotifications';
 import { Notification } from '../types/notification.types';
 import ImageViewerModal from '../components/common/image-viewer-modal';
 import { Bell, Calendar, Heart } from 'react-native-feather';
+
+const {width} = Dimensions.get("window");
+
+// Custom hook to get image dimensions
+const useImageDimensions = (uri: string) => {
+    const [dimensions, setDimensions] = useState<{width: number, height: number} | null>(null);
+
+    useEffect(() => {
+        if (uri) {
+            Image.getSize(uri, 
+                (imgWidth, imgHeight) => {
+                    setDimensions({width: imgWidth, height: imgHeight});
+                },
+                (error) => {
+                    console.error('Error getting image dimensions:', error);
+                    // Fallback to square aspect ratio
+                    setDimensions({width: 1, height: 1});
+                }
+            );
+        }
+    }, [uri]);
+
+    return dimensions;
+};
 
 const NotificationScreen: React.FC = () => {
     const {
@@ -33,14 +58,6 @@ const NotificationScreen: React.FC = () => {
     // State for image viewer
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [isImageViewerVisible, setIsImageViewerVisible] = useState(false);
-
-    // Animation values
-    const scale = useRef(new Animated.Value(1)).current;
-    const translateX = useRef(new Animated.Value(0)).current;
-    const translateY = useRef(new Animated.Value(0)).current;
-
-    // Track current scale separately
-    const currentScale = useRef(1);
 
     const onRefresh = React.useCallback(async () => {
         await refresh();
@@ -67,53 +84,55 @@ const NotificationScreen: React.FC = () => {
     const handleImagePress = (imageUri: string) => {
         setSelectedImage(imageUri);
         setIsImageViewerVisible(true);
-        resetImageTransforms();
-    };
-
-    // Reset all transforms
-    const resetImageTransforms = () => {
-        Animated.parallel([
-            Animated.spring(scale, {
-                toValue: 1,
-                useNativeDriver: true,
-            }),
-            Animated.spring(translateX, {
-                toValue: 0,
-                useNativeDriver: true,
-            }),
-            Animated.spring(translateY, {
-                toValue: 0,
-                useNativeDriver: true,
-            }),
-        ]).start();
-        currentScale.current = 1;
     };
 
     // Close image viewer
     const closeImageViewer = () => {
         setIsImageViewerVisible(false);
         setSelectedImage(null);
-        resetImageTransforms();
+    };
+
+    // Component for image with dynamic height
+    const DynamicImage = ({ uri }: { uri: string }) => {
+        const dimensions = useImageDimensions(uri);
+        
+        if (!dimensions) {
+            // Show loading state or placeholder while dimensions are being fetched
+            return (
+                <View style={[styles.imageContainer, {height: width}]}>
+                    <ActivityIndicator size="small" color="#3B82F6" />
+                </View>
+            );
+        }
+
+        const aspectRatio = dimensions.width / dimensions.height;
+        // Calculate height based on aspect ratio, but cap it for very tall images
+        const calculatedHeight = Math.min(width / aspectRatio, width * 1.5);
+        
+        return (
+            <Image
+                source={{ uri }}
+                style={[styles.notificationImage, {height: calculatedHeight}]}
+                resizeMode="cover"
+            />
+        );
     };
 
     const renderNotificationItem = ({ item }: { item: Notification }) => {
         const hasReaction = item.user_reacted === 'Yes';
         const reactionCount = parseInt(item.total_reaction) || 0;
+        const isMemorial = item.deathnote === 'Yes';
 
         return (
-            <TouchableOpacity style={styles.notificationCard} activeOpacity={0.9}>
-                {/* Image Section - Center Top */}
+            <View style={styles.notificationCard}>
+                {/* Image Section with Dynamic Height */}
                 {item.photo ? (
                     <TouchableOpacity
                         activeOpacity={0.9}
                         onPress={() => handleImagePress(item.photo)}
                         style={styles.imageTouchable}
                     >
-                        <Image
-                            source={{ uri: item.photo }}
-                            style={styles.notificationImage}
-                            resizeMode="contain"
-                        />
+                        <DynamicImage uri={item.photo} />
                     </TouchableOpacity>
                 ) : (
                     <View style={styles.placeholderImage}>
@@ -121,52 +140,72 @@ const NotificationScreen: React.FC = () => {
                     </View>
                 )}
 
+                {/* Content Section */}
                 <View style={styles.contentContainer}>
-                    <Text style={styles.notificationTitle}>
-                        {item.title}
-                    </Text>
-
-                    {item.description ? (
-                        <Text style={styles.notificationDescription}>
-                            {item.description}
+                    <View style={styles.textContainer}>
+                        <Text style={styles.notificationTitle}>
+                            {item.title}
                         </Text>
-                    ) : null}
 
-                    <View style={styles.dateRow}>
-                        <Calendar stroke="#6B7280" width={14} height={14} />
-                        <Text style={styles.dateText}>{formatDate(item.date)}</Text>
-                        {item.deathnote === 'Yes' && (
-                            <View style={styles.deathBadge}>
-                                <Text style={styles.deathBadgeText}>Memorial</Text>
-                            </View>
-                        )}
+                        {item.description ? (
+                            <Text style={styles.notificationDescription} numberOfLines={2}>
+                                {item.description}
+                            </Text>
+                        ) : null}
+
+                        <View style={styles.dateRow}>
+                            <Calendar stroke="#6B7280" width={14} height={14} />
+                            <Text style={styles.dateText}>{formatDate(item.date)}</Text>
+                            {isMemorial && (
+                                <View style={styles.deathBadge}>
+                                    <Text style={styles.deathBadgeText}>Memorial</Text>
+                                </View>
+                            )}
+                        </View>
                     </View>
 
-                    {/* Big Like Button with Count */}
-                    <TouchableOpacity
-                        style={[
-                            styles.likeButton,
-                            hasReaction && styles.likeButtonActive,
-                        ]}
-                        activeOpacity={0.8}
-                    >
-                        <Heart
-                            stroke={hasReaction ? '#FFFFFF' : '#EF4444'}
-                            width={24}
-                            height={24}
-                            fill={hasReaction ? '#FFFFFF' : 'none'}
-                        />
-                        <Text
+                    {/* Action Button */}
+                    <View style={styles.buttonContainer}>
+                        <TouchableOpacity
                             style={[
-                                styles.likeButtonText,
-                                hasReaction && styles.likeButtonTextActive,
+                                styles.actionButton,
+                                isMemorial ? styles.prayButton : styles.likeButton,
+                                hasReaction && styles.actionButtonActive,
                             ]}
+                            activeOpacity={0.7}
                         >
-                            {reactionCount > 0 ? `${reactionCount} Likes` : 'Like'}
-                        </Text>
-                    </TouchableOpacity>
+                            <View style={styles.buttonContent}>
+                                {isMemorial ? (
+                                    <>
+                                        <Text style={styles.prayEmoji}>🙏</Text>
+                                        <Text style={[
+                                            styles.buttonText,
+                                            hasReaction && styles.buttonTextActive
+                                        ]}>
+                                            {reactionCount > 0 ? `${reactionCount} Prayers` : 'Pray'}
+                                        </Text>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Heart
+                                            stroke={hasReaction ? '#FFFFFF' : '#EF4444'}
+                                            width={20}
+                                            height={20}
+                                            fill={hasReaction ? '#EF4444' : 'none'}
+                                        />
+                                        <Text style={[
+                                            styles.buttonText,
+                                            hasReaction && styles.buttonTextActive
+                                        ]}>
+                                            {reactionCount > 0 ? `${reactionCount} Likes` : 'Like'}
+                                        </Text>
+                                    </>
+                                )}
+                            </View>
+                        </TouchableOpacity>
+                    </View>
                 </View>
-            </TouchableOpacity>
+            </View>
         );
     };
 
@@ -304,63 +343,63 @@ const styles = StyleSheet.create({
         marginTop: 12,
         fontSize: 16,
         color: '#6B7280',
+        textAlign: 'center',
     },
     listContainer: {
-        padding: 16,
+        padding: 12,
     },
     emptyListContainer: {
         flex: 1,
     },
     notificationCard: {
         backgroundColor: '#FFFFFF',
-        borderRadius: 16,
-        marginBottom: 16,
+        borderRadius: 12,
+        marginBottom: 12,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 3,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 3,
+        elevation: 2,
         overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: '#F3F4F6',
     },
     imageTouchable: {
-        position: 'relative',
-    },
-    notificationImage: {
         width: '100%',
-        height: 200,
-        backgroundColor: '#F3F4F6',
     },
-    imageOverlay: {
-        position: 'absolute',
-        top: 8,
-        right: 8,
-        backgroundColor: 'rgba(0, 0, 0, 0.6)',
-        width: 36,
-        height: 36,
-        borderRadius: 18,
+    imageContainer: {
+        width: '100%',
+        backgroundColor: '#F3F4F6',
         justifyContent: 'center',
         alignItems: 'center',
     },
+    notificationImage: {
+        width: '100%',
+        backgroundColor: '#F3F4F6',
+    },
     placeholderImage: {
         width: '100%',
-        height: 200,
+        height: width, // Square placeholder
         backgroundColor: '#F3F4F6',
         justifyContent: 'center',
         alignItems: 'center',
     },
     contentContainer: {
         padding: 16,
+    },
+    textContainer: {
+        marginBottom: 16,
         alignItems: 'center',
     },
     notificationTitle: {
         fontSize: 18,
-        fontWeight: '700',
+        fontWeight: '600',
         color: '#1F2937',
         marginBottom: 8,
         textAlign: 'center',
     },
     notificationDescription: {
-        fontSize: 12,
+        fontSize: 14,
         color: '#6B7280',
         marginBottom: 12,
         lineHeight: 20,
@@ -370,43 +409,70 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: 16,
+        marginTop: 4,
     },
     dateText: {
-        fontSize: 12,
+        fontSize: 13,
         color: '#6B7280',
         marginLeft: 6,
         marginRight: 12,
+        textAlign: 'center',
     },
     deathBadge: {
         paddingHorizontal: 8,
         paddingVertical: 4,
-        borderRadius: 6,
+        borderRadius: 4,
+        backgroundColor: '#FEE2E2',
+        borderWidth: 1,
+        borderColor: '#FECACA',
     },
     deathBadgeText: {
         fontSize: 10,
         fontWeight: '600',
         color: '#DC2626',
+        textAlign: 'center',
     },
-    likeButton: {
+    buttonContainer: {
+        alignItems: 'center',
+    },
+    actionButton: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
         paddingVertical: 12,
-        paddingHorizontal: 32, 
-        minWidth: 140, 
-        alignSelf: 'center', 
+        paddingHorizontal: 24,
+        borderRadius: 8,
+        borderWidth: 1.5,
     },
-    likeButtonActive: {
+    likeButton: {
+        backgroundColor: '#FFFFFF',
+        borderColor: '#EF4444',
     },
-    likeButtonText: {
-        fontSize: 12,
-        fontWeight: '700',
+    prayButton: {
+        backgroundColor: '#FFFFFF',
+        borderColor: '#8B5CF6',
+    },
+    actionButtonActive: {
+        backgroundColor: '#EF4444',
+        borderColor: '#EF4444',
+    },
+    buttonContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+    },
+    buttonText: {
+        fontSize: 14,
+        fontWeight: '600',
         color: '#EF4444',
-        marginLeft: 8,
+        textAlign: 'center',
     },
-    likeButtonTextActive: {
+    buttonTextActive: {
         color: '#FFFFFF',
+    },
+    prayEmoji: {
+        fontSize: 18,
     },
     emptyContainer: {
         flex: 1,
@@ -447,6 +513,7 @@ const styles = StyleSheet.create({
         color: '#FFFFFF',
         fontSize: 16,
         fontWeight: '600',
+        textAlign: 'center',
     },
     footerLoader: {
         padding: 20,
@@ -458,6 +525,7 @@ const styles = StyleSheet.create({
         marginLeft: 10,
         fontSize: 14,
         color: '#6B7280',
+        textAlign: 'center',
     },
 });
 
