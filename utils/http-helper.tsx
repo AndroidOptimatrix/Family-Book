@@ -1,6 +1,7 @@
 import { ApiResponse } from "../types/api.types";
 
 const API_BASE_URL = 'https://www.demo.optiinfo.com/project/saraswatshakti/WebServices/WS.php';
+// const LOCAL_BASE_URL = 'http://192.168.1.25:8074/saraswatshakti/WebServices/WS.php'; -- not work in this environment, only work in RDP
 
 // Helper function for making API calls with fetch
 export const makeApiCall = async (endpoint: string, params: Record<string, string>): Promise<ApiResponse> => {
