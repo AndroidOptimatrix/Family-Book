@@ -17,17 +17,15 @@ import {
   Bell,
   Calendar,
   Heart,
-  Video as VideoIcon,
-  Users,
   Facebook,
   Instagram,
   Youtube,
   Gift,
   HelpCircle,
   Video,
-  User,
   BookOpen,
-  Globe
+  Globe,
+  PlusCircle
 } from 'react-native-feather';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 
@@ -177,54 +175,21 @@ const DashboardScreen: React.FC = () => {
   const gridItems: GridItemType[] = [
     {
       id: '1',
-      title: 'Notification',
+      title: 'Latest Updates',
+      gujTitle: 'તાજેતરની સુચનાઓ',
       icon: Bell,
       gradient: BLUE_50,
       screen: 'Notifications',
       icon_bg: ['#accdffff', '#0048e4ff']
     },
-
-    {
-      id: '2',
-      title: 'Video',
-      icon: VideoIcon,
-      gradient: BLUE_50,
-      screen: 'Videos',
-      icon_bg: ['#accdffff', '#0048e4ff']
-
-    },
-    {
-      id: '3',
-      title: 'Events',
-      icon: Users,
-      gradient: BLUE_50,
-      screen: 'Events',
-      icon_bg: ['#accdffff', '#0048e4ff']
-
-    },
     {
       id: '4',
-      title: 'My Profile',
-      icon: User,
-      gradient: PURPLE_50,
-      screen: 'Profile',
-      icon_bg: ['#eaccffff', '#5300acff']
-    },
-    {
-      id: '5',
-      title: 'Birthday',
-      icon: Calendar,
-      gradient: PURPLE_50,
+      title: 'Medical Fund Donor',
+      gujTitle: 'મેડિકલ ફંડના દાતાર',
+      icon: PlusCircle,
+      gradient: BLUE_50,
       screen: '',
-      icon_bg: ['#eaccffff', '#5300acff']
-    },
-    {
-      id: '6',
-      title: 'Anniversary',
-      icon: Heart,
-      gradient: PURPLE_50,
-      screen: '',
-      icon_bg: ['#eaccffff', '#5300acff']
+      icon_bg: ['#accdffff', '#0048e4ff']
     },
   ];
 
@@ -362,17 +327,22 @@ const DashboardScreen: React.FC = () => {
           {/* Main Grid Section */}
           <View style={[styles.section, { marginTop: 15 }]}>
             <View style={styles.gridContainer}>
-              {gridRows.map((row, rowIndex) => (
-                <View key={rowIndex} style={styles.gridRow}>
-                  {row.map((item) => (
-                    <GridItem
-                      key={item.id}
-                      item={item}
-                      onPress={() => handleGridItemPress(item)}
-                    />
-                  ))}
-                </View>
-              ))}
+              {gridRows.map((row, rowIndex) => {
+                const isLastRow = rowIndex === gridRows.length - 1;
+                const isLastRowNotFull = isLastRow && row.length < 3;
+                return (
+                  <View key={rowIndex} style={{gap: 10}} >
+                    {row.map((item) => (
+                      <GridItem
+                        key={item.id}
+                        item={item}
+                        onPress={() => handleGridItemPress(item)}
+                        flex={isLastRowNotFull}
+                      />
+                    ))}
+                  </View>
+                )
+              })}
             </View>
           </View>
 

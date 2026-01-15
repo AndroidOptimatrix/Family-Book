@@ -16,6 +16,7 @@ export type GridItem = {
   gradient: string;
   screen: string;
   icon_bg: string[];
+  gujTitle?: string;
 };
 
 export type Advertisement = {
