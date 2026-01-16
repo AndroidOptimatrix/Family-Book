@@ -170,6 +170,13 @@ const DashboardScreen: React.FC = () => {
       gradient: GREEN_50,
       screen: 'Support',
     },
+    {
+      id: '8',
+      title: 'Medical Fund Donor',
+      icon: PlusCircle,
+      gradient: PURPLE_50,
+      screen: '',
+    },
   ];
 
   const gridItems: GridItemType[] = [
@@ -185,7 +192,7 @@ const DashboardScreen: React.FC = () => {
     {
       id: '4',
       title: 'Medical Fund Donor',
-      gujTitle: 'મેડિકલ ફંડના દાતાર',
+      gujTitle: 'મેડિકલ ફંડના દાતા',
       icon: PlusCircle,
       gradient: BLUE_50,
       screen: '',
