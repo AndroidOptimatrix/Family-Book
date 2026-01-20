@@ -14,6 +14,7 @@ import ProfileScreen from './pages/profile-screen';
 import SupportScreen from './pages/support-screen';
 
 import 'react-native-gesture-handler';
+import MedicalDonorScreen from './pages/medical-donor-screen';
 
 // import SupportScreen from './pages/support-screen';
 
@@ -48,6 +49,7 @@ const DashboardStackNavigator = () => {
       <DashboardStack.Screen name="Profile" component={ProfileScreen} />
       <DashboardStack.Screen name="Advertisements" component={AdvertisementScreen} />
       <DashboardStack.Screen name="Support" component={SupportScreen} />
+      <DashboardStack.Screen name="MedicalDonor" component={MedicalDonorScreen} />
     </DashboardStack.Navigator>
   );
 };
