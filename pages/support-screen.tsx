@@ -73,15 +73,7 @@ const SupportScreen: React.FC = () => {
       value: 'Message us on WhatsApp',
       action: handleWhatsAppPress,
       actionIcon: <ChevronRight width={20} height={20} color="#25D366" />,
-    },
-    {
-      id: 4,
-      icon: <Clock width={20} height={20} color="#6B7280" />,
-      label: 'Support Hours',
-      value: 'Phone: 9 AM - 6 PM (Mon-Sat)',
-      action: null,
-      actionIcon: null,
-    },
+    }
   ];
 
   return (
@@ -98,7 +90,7 @@ const SupportScreen: React.FC = () => {
           
           <View style={styles.contactInfoCard}>
             {contactInfoItems.map((item) => (
-              <View key={item.id} style={styles.contactInfoItem}>
+              <TouchableOpacity key={item.id} style={styles.contactInfoItem} onPress={item.action ?? item.action}>
                 <View style={styles.contactInfoLeft}>
                   <View style={styles.contactInfoIconContainer}>
                     {item.icon}
@@ -108,17 +100,7 @@ const SupportScreen: React.FC = () => {
                     <Text style={styles.contactInfoValue}>{item.value}</Text>
                   </View>
                 </View>
-                
-                {item.action && (
-                  <TouchableOpacity
-                    style={styles.actionButton}
-                    onPress={item.action}
-                    activeOpacity={0.7}
-                  >
-                    {item.actionIcon}
-                  </TouchableOpacity>
-                )}
-              </View>
+              </TouchableOpacity>
             ))}
           </View>
         </View>
