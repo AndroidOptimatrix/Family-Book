@@ -41,7 +41,7 @@ const useNotifications = () => {
             }
 
             setError(null);
-            
+
             const params = {
                 type: 'notification_list',
                 user_id: userId.toString(),
@@ -58,7 +58,7 @@ const useNotifications = () => {
                     setNotifications([]);
                 }
                 setHasMore(false);
-                
+
                 // Reset loading states
                 setLoading(false);
                 setLoadingMore(false);
@@ -144,6 +144,30 @@ const useNotifications = () => {
         setNotifications([]);
     }, []);
 
+
+    // --- Notification Action ---
+    const toggleLike = async (notificationId: string) => {
+        const userId = userInfo?.user_id || userInfo?.id;
+
+        if (!userId) {
+            console.log('⚠️ No user ID available for toggling like');
+            return;
+        }
+
+        try {
+            const params = {
+                'type': 'notification_like',
+                'user_id': userId.toString(),
+                'notification_id': notificationId,
+            }
+            const response = await makeApiCall('', params);
+            console.log("👍 Like toggled:", response);
+
+        } catch (err) {
+            console.error("❌ Error toggling like:", err);
+        }
+    }
+
     return {
         loading,
         loadingMore,
@@ -152,11 +176,12 @@ const useNotifications = () => {
         hasMore,
         totalNotifications,
         refreshing,
-        refetch: refresh, // For backward compatibility
+        refetch: refresh,
         loadMore,
         refresh,
         resetPagination,
         currentPage: page,
+        toggleLike
     }
 }
 
