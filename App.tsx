@@ -85,7 +85,7 @@ const AppContent: React.FC = () => {
             setSplashVisible(false);
           }
         }}
-        logoSource={require('./vertical-logo.png')}
+        logoSource={require('./logo.png')}
       />
     );
   }

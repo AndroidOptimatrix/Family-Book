@@ -9,7 +9,7 @@ const Header: React.FC<HeaderProps> = ({ otpSent }) => {
     return (
         <View style={styles.headerContainer}>
             <Image
-                source={require('../../vertical-logo.png')}
+                source={require('../../logo.png')}
                 style={styles.logoImage}
                 resizeMode="contain"
             />

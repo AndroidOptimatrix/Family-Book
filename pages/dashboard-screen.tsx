@@ -318,7 +318,7 @@ const DashboardScreen: React.FC = () => {
         {/* Header Component */}
         <Header
           onMenuPress={openSidebar}
-          logoSource={require('../horizontal-logo.png')}
+          logoSource={require('../logo.png')}
         />
 
         <ScrollView
