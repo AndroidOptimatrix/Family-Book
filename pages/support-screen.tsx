@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -14,15 +14,33 @@ import {
   Mail,
   Phone,
   MessageCircle,
-  Clock,
   ChevronRight,
 } from 'react-native-feather';
 import LinearHeader from '../components/common/header';
+import useSupport from '../hooks/useSupport';
 
 const SupportScreen: React.FC = () => {
-  const supportEmail = 'support@familybook.com';
-  const supportPhone = '+91 1800 123 4567';
-  const whatsappNumber = '+919876543210';
+
+  const { error, loading, supportData } = useSupport();
+
+  // fallback values
+  const [supportEmail, setSupportEmail] = useState<string>('support@familybook.com');
+  const [supportPhone, setSupportPhone] = useState<string>('+91 1800 123 4567');
+  const [whatsappNumber, setWhatsappNumber] = useState<string>('+919876543210');
+
+  useEffect(() => {
+    if (supportData && supportData.length > 0) {
+      supportData.forEach((item) => {
+        if (item.plateform === 'email') {
+          setSupportEmail(item.value);
+        } else if (item.plateform === 'phone') {
+          setSupportPhone(item.value);
+        } else if (item.plateform === 'whatsapp') {
+          setWhatsappNumber(item.value);
+        }
+      });
+    }
+  }, [supportData]);
 
   const handleEmailPress = () => {
     Linking.openURL(`mailto:${supportEmail}?subject=Family Book Support`).catch(() => {
@@ -87,7 +105,7 @@ const SupportScreen: React.FC = () => {
         {/* Contact Info Section with Icon Buttons */}
         <View style={styles.contactInfoContainer}>
           <Text style={styles.sectionTitle}>Contact Information</Text>
-          
+
           <View style={styles.contactInfoCard}>
             {contactInfoItems.map((item) => (
               <TouchableOpacity key={item.id} style={styles.contactInfoItem} onPress={item.action ?? item.action}>
