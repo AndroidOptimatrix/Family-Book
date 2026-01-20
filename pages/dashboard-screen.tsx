@@ -175,7 +175,7 @@ const DashboardScreen: React.FC = () => {
       title: 'Medical Fund Donor',
       icon: PlusCircle,
       gradient: PURPLE_50,
-      screen: '',
+      screen: 'MedicalDonor',
     },
   ];
 
@@ -195,7 +195,7 @@ const DashboardScreen: React.FC = () => {
       gujTitle: 'મેડિકલ ફંડના દાતા',
       icon: PlusCircle,
       gradient: BLUE_50,
-      screen: '',
+      screen: 'MedicalDonor',
       icon_bg: ['#accdffff', '#0048e4ff']
     },
   ];

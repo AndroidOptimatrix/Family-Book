@@ -19,22 +19,22 @@ import { Notification } from '../types/notification.types';
 import ImageViewerModal from '../components/common/image-viewer-modal';
 import { Bell, Calendar, Heart } from 'react-native-feather';
 
-const {width} = Dimensions.get("window");
+const { width } = Dimensions.get("window");
 
 // Custom hook to get image dimensions
 const useImageDimensions = (uri: string) => {
-    const [dimensions, setDimensions] = useState<{width: number, height: number} | null>(null);
+    const [dimensions, setDimensions] = useState<{ width: number, height: number } | null>(null);
 
     useEffect(() => {
         if (uri) {
-            Image.getSize(uri, 
+            Image.getSize(uri,
                 (imgWidth, imgHeight) => {
-                    setDimensions({width: imgWidth, height: imgHeight});
+                    setDimensions({ width: imgWidth, height: imgHeight });
                 },
                 (error) => {
                     console.error('Error getting image dimensions:', error);
                     // Fallback to square aspect ratio
-                    setDimensions({width: 1, height: 1});
+                    setDimensions({ width: 1, height: 1 });
                 }
             );
         }
@@ -52,7 +52,7 @@ const NotificationScreen: React.FC = () => {
         hasMore,
         refreshing,
         loadMore,
-        refresh
+        refresh, toggleLike
     } = useNotifications();
 
     // State for image viewer
@@ -95,11 +95,11 @@ const NotificationScreen: React.FC = () => {
     // Component for image with dynamic height
     const DynamicImage = ({ uri }: { uri: string }) => {
         const dimensions = useImageDimensions(uri);
-        
+
         if (!dimensions) {
             // Show loading state or placeholder while dimensions are being fetched
             return (
-                <View style={[styles.imageContainer, {height: width}]}>
+                <View style={[styles.imageContainer, { height: width }]}>
                     <ActivityIndicator size="small" color="#3B82F6" />
                 </View>
             );
@@ -108,15 +108,19 @@ const NotificationScreen: React.FC = () => {
         const aspectRatio = dimensions.width / dimensions.height;
         // Calculate height based on aspect ratio, but cap it for very tall images
         const calculatedHeight = Math.min(width / aspectRatio, width * 1.5);
-        
+
         return (
             <Image
                 source={{ uri }}
-                style={[styles.notificationImage, {height: calculatedHeight}]}
+                style={[styles.notificationImage, { height: calculatedHeight }]}
                 resizeMode="cover"
             />
         );
     };
+
+    async function handleNotificationLikeToggle(item: Notification) {
+        await toggleLike(item.id)
+    }
 
     const renderNotificationItem = ({ item }: { item: Notification }) => {
         const hasReaction = item.user_reacted === 'Yes';
@@ -173,6 +177,7 @@ const NotificationScreen: React.FC = () => {
                                 hasReaction && styles.actionButtonActive,
                             ]}
                             activeOpacity={0.7}
+                            onPress={() =>handleNotificationLikeToggle(item)}
                         >
                             <View style={styles.buttonContent}>
                                 {isMemorial ? (
