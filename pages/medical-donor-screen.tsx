@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     View,
     Text,
@@ -8,14 +8,18 @@ import {
     Image,
     ActivityIndicator,
     RefreshControl,
+    TouchableOpacity,
 } from 'react-native';
-import { Heart, DollarSign } from 'react-native-feather';
 import useMedicalDonors from '../hooks/useMedicalDonors';
 import LinearHeader from '../components/common/header';
+import ImageViewerModal from '../components/common/image-viewer-modal';
 
 const MedicalDonorScreen: React.FC = () => {
     const { donors, loading, error } = useMedicalDonors();
-    const [refreshing, setRefreshing] = React.useState(false);
+    const [refreshing, setRefreshing] = useState(false);
+
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [isImageViewerVisible, setIsImageViewerVisible] = useState(false);
 
     const onRefresh = () => {
         setRefreshing(true);
@@ -32,13 +36,38 @@ const MedicalDonorScreen: React.FC = () => {
         return `₹${parseInt(amount).toLocaleString('en-IN')}`;
     };
 
-    // Format date
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-        });
+    // Format date to "dd MMM, yyyy" format (e.g., "20 Jan, 2026")
+    const formatDate = (dateString: string): string => {
+        try {
+            const date = new Date(dateString);
+
+            if (isNaN(date.getTime())) {
+                return dateString;
+            }
+
+            const day = date.getDate().toString().padStart(2, '0'); // 01, 02, ..., 31
+            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const month = monthNames[date.getMonth()];
+            const year = date.getFullYear();
+
+            return `${day} ${month}, ${year}`; // "20 Jan, 2026"
+
+        } catch (error) {
+            console.error('Error formatting date:', error);
+            return dateString;
+        }
+    };
+
+    // Handle image press to open modal
+    const handleImagePress = (imageUri: string) => {
+        setSelectedImage(imageUri);
+        setIsImageViewerVisible(true);
+    };
+
+    // Close image viewer modal
+    const closeImageViewer = () => {
+        setIsImageViewerVisible(false);
+        setSelectedImage(null);
     };
 
     if (loading) {
@@ -70,7 +99,7 @@ const MedicalDonorScreen: React.FC = () => {
 
                 {/* Total Section */}
                 <View style={styles.totalContainer}>
-                    <Text style={styles.totalTitle}>Total Raised</Text>
+                    <Text style={styles.totalTitle}>Total Fund</Text>
                     <Text style={styles.totalAmount}>
                         {formatCurrency(totalDonations.toString())}
                     </Text>
@@ -91,10 +120,15 @@ const MedicalDonorScreen: React.FC = () => {
                 <View style={styles.donorsList}>
                     {donors?.map((donor) => (
                         <View key={donor.id} style={styles.donorCard}>
-                            <Image
-                                source={{ uri: donor.photo }}
-                                style={styles.donorAvatar}
-                            />
+                            <TouchableOpacity
+                                activeOpacity={0.7}
+                                onPress={() => donor.photo && handleImagePress(donor.photo)}
+                            >
+                                <Image
+                                    source={{ uri: donor.photo }}
+                                    style={styles.donorAvatar}
+                                />
+                            </TouchableOpacity>
 
                             <View style={styles.donorInfo}>
                                 <View style={styles.donorHeader}>
@@ -114,6 +148,12 @@ const MedicalDonorScreen: React.FC = () => {
                     ))}
                 </View>
             </ScrollView>
+
+            <ImageViewerModal
+                imageUri={selectedImage}
+                isVisible={isImageViewerVisible}
+                onClose={closeImageViewer}
+            />
         </SafeAreaView>
     );
 };

@@ -1,4 +1,5 @@
-import React, { useCallback, useState, useEffect } from 'react';
+// screens/NotificationScreen.tsx
+import React, { useCallback, useState, useEffect, useRef } from 'react';
 import {
     View,
     Text,
@@ -11,7 +12,6 @@ import {
     ActivityIndicator,
     Platform,
     Dimensions,
-    ImageURISource,
 } from 'react-native';
 import LinearHeader from '../components/common/header';
 import useNotifications from '../hooks/useNotifications';
@@ -33,7 +33,6 @@ const useImageDimensions = (uri: string) => {
                 },
                 (error) => {
                     console.error('Error getting image dimensions:', error);
-                    // Fallback to square aspect ratio
                     setDimensions({ width: 1, height: 1 });
                 }
             );
@@ -52,14 +51,28 @@ const NotificationScreen: React.FC = () => {
         hasMore,
         refreshing,
         loadMore,
-        refresh, toggleLike
+        refresh,
+        toggleLike
     } = useNotifications();
 
+    // Local state for notifications to handle immediate UI updates
+    const [localNotifications, setLocalNotifications] = useState<Notification[]>(notifications || []);
+    
+    // Ref to prevent multiple onEndReached calls
+    const onEndReachedCalledDuringMomentum = useRef(true);
+    
     // State for image viewer
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [isImageViewerVisible, setIsImageViewerVisible] = useState(false);
 
-    const onRefresh = React.useCallback(async () => {
+    // Update local notifications when the hook notifications change
+    useEffect(() => {
+        if (notifications) {
+            setLocalNotifications(notifications);
+        }
+    }, [notifications]);
+
+    const onRefresh = useCallback(async () => {
         await refresh();
     }, [refresh]);
 
@@ -75,10 +88,17 @@ const NotificationScreen: React.FC = () => {
     };
 
     const handleLoadMore = useCallback(() => {
-        if (hasMore && !loadingMore && !loading) {
+        if (!hasMore || loadingMore || loading) return;
+        
+        if (onEndReachedCalledDuringMomentum.current) {
             loadMore();
+            onEndReachedCalledDuringMomentum.current = false;
         }
     }, [hasMore, loadingMore, loading, loadMore]);
+
+    const onMomentumScrollBegin = useCallback(() => {
+        onEndReachedCalledDuringMomentum.current = true;
+    }, []);
 
     // Handle image press
     const handleImagePress = (imageUri: string) => {
@@ -97,7 +117,6 @@ const NotificationScreen: React.FC = () => {
         const dimensions = useImageDimensions(uri);
 
         if (!dimensions) {
-            // Show loading state or placeholder while dimensions are being fetched
             return (
                 <View style={[styles.imageContainer, { height: width }]}>
                     <ActivityIndicator size="small" color="#3B82F6" />
@@ -106,7 +125,6 @@ const NotificationScreen: React.FC = () => {
         }
 
         const aspectRatio = dimensions.width / dimensions.height;
-        // Calculate height based on aspect ratio, but cap it for very tall images
         const calculatedHeight = Math.min(width / aspectRatio, width * 1.5);
 
         return (
@@ -119,7 +137,43 @@ const NotificationScreen: React.FC = () => {
     };
 
     async function handleNotificationLikeToggle(item: Notification) {
-        await toggleLike(item.id)
+        const notificationIndex = localNotifications.findIndex(notif => notif.id === item.id);
+
+        if (notificationIndex === -1) return;
+
+        // Create a copy of the notification
+        const updatedNotification = { ...localNotifications[notificationIndex] };
+
+        // Toggle the like state locally for immediate UI update
+        const wasLiked = updatedNotification.user_reacted === 'Yes';
+        const currentReactions = parseInt(updatedNotification.total_reaction) || 0;
+
+        // Update local state immediately
+        updatedNotification.user_reacted = wasLiked ? 'No' : 'Yes';
+        updatedNotification.total_reaction = wasLiked
+            ? (currentReactions - 1).toString()
+            : (currentReactions + 1).toString();
+
+        // Update local notifications array
+        const updatedNotifications = [...localNotifications];
+        updatedNotifications[notificationIndex] = updatedNotification;
+        setLocalNotifications(updatedNotifications);
+
+        // Call the API
+        try {
+            await toggleLike(item.id.toString());
+        } catch (error) {
+            // If API call fails, revert the local state
+            console.error('Failed to toggle like:', error);
+
+            // Revert changes
+            updatedNotification.user_reacted = wasLiked ? 'Yes' : 'No';
+            updatedNotification.total_reaction = currentReactions.toString();
+
+            const revertedNotifications = [...localNotifications];
+            revertedNotifications[notificationIndex] = updatedNotification;
+            setLocalNotifications(revertedNotifications);
+        }
     }
 
     const renderNotificationItem = ({ item }: { item: Notification }) => {
@@ -175,9 +229,10 @@ const NotificationScreen: React.FC = () => {
                                 styles.actionButton,
                                 isMemorial ? styles.prayButton : styles.likeButton,
                                 hasReaction && styles.actionButtonActive,
+                                isMemorial && hasReaction && styles.prayButtonActive,
                             ]}
                             activeOpacity={0.7}
-                            onPress={() =>handleNotificationLikeToggle(item)}
+                            onPress={() => handleNotificationLikeToggle(item)}
                         >
                             <View style={styles.buttonContent}>
                                 {isMemorial ? (
@@ -232,7 +287,7 @@ const NotificationScreen: React.FC = () => {
             </View>
             <Text style={styles.emptyTitle}>No Notifications</Text>
             <Text style={styles.emptySubtitle}>
-                You're all caught up! Check back later for updates.
+                {loading ? 'Loading...' : 'You\'re all caught up! Check back later for updates.'}
             </Text>
         </View>
     );
@@ -256,9 +311,9 @@ const NotificationScreen: React.FC = () => {
 
     return (
         <SafeAreaView style={styles.container}>
-            <LinearHeader title='Notifications' subtitle={`${notifications.length} new notifications`} />
+            <LinearHeader title='Notifications' subtitle={`${localNotifications.length} notifications`} />
 
-            {loading && !refreshing ? (
+            {loading && !refreshing && localNotifications.length === 0 ? (
                 <View style={styles.loadingContainer}>
                     <ActivityIndicator size="large" color="#3B82F6" />
                     <Text style={styles.loadingText}>Loading notifications...</Text>
@@ -267,11 +322,11 @@ const NotificationScreen: React.FC = () => {
                 renderErrorState()
             ) : (
                 <FlatList
-                    data={notifications}
+                    data={localNotifications}
                     renderItem={renderNotificationItem}
-                    keyExtractor={(item, index) => item.id || `notification-${index}`}
+                    keyExtractor={(item) => item.id.toString() || `notification-${Math.random()}`}
                     contentContainerStyle={
-                        notifications.length === 0 ? styles.emptyListContainer : styles.listContainer
+                        localNotifications.length === 0 ? styles.emptyListContainer : styles.listContainer
                     }
                     ListEmptyComponent={renderEmptyState}
                     ListFooterComponent={renderFooter}
@@ -285,7 +340,9 @@ const NotificationScreen: React.FC = () => {
                     }
                     showsVerticalScrollIndicator={false}
                     onEndReached={handleLoadMore}
-                    onEndReachedThreshold={0.3}
+                    onEndReachedThreshold={0.5}
+                    onMomentumScrollBegin={onMomentumScrollBegin}
+                    removeClippedSubviews={false}
                 />
             )}
 
@@ -299,45 +356,6 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#F9FAFB',
         paddingBottom: Platform.OS == 'android' ? 30 : 0
-    },
-    backButton: {
-        padding: 8,
-        backgroundColor: 'rgba(255, 255, 255, 0.2)',
-        borderRadius: 12,
-        width: 40,
-        height: 40,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    gradientHeader: {
-        paddingTop: 20,
-        paddingHorizontal: 20,
-        borderBottomLeftRadius: 20,
-        borderBottomRightRadius: 20,
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: 10,
-    },
-    headerContent: {
-        flex: 1,
-        alignItems: 'center',
-    },
-    headerTitle: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        color: '#000000',
-        marginBottom: 4,
-        textShadowColor: 'rgba(0, 0, 0, 0.2)',
-        textShadowOffset: { width: 0, height: 1 },
-        textShadowRadius: 2,
-    },
-    headerSubtitle: {
-        fontSize: 14,
-        color: 'rgba(51, 50, 50, 0.95)',
-        textAlign: 'center',
     },
     loadingContainer: {
         flex: 1,
@@ -384,7 +402,7 @@ const styles = StyleSheet.create({
     },
     placeholderImage: {
         width: '100%',
-        height: width, // Square placeholder
+        height: width,
         backgroundColor: '#F3F4F6',
         justifyContent: 'center',
         alignItems: 'center',
@@ -445,9 +463,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         paddingVertical: 12,
-        paddingHorizontal: 24,
+        paddingHorizontal: 36,
         borderRadius: 8,
         borderWidth: 1.5,
+        minWidth: width * 0.6,
     },
     likeButton: {
         backgroundColor: '#FFFFFF',
@@ -460,6 +479,10 @@ const styles = StyleSheet.create({
     actionButtonActive: {
         backgroundColor: '#EF4444',
         borderColor: '#EF4444',
+    },
+    prayButtonActive: {
+        backgroundColor: '#8B5CF6',
+        borderColor: '#8B5CF6',
     },
     buttonContent: {
         flexDirection: 'row',
