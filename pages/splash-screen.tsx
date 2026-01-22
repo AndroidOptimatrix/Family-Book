@@ -23,7 +23,7 @@ interface SplashScreenProps {
 
 const SplashScreen: React.FC<SplashScreenProps> = ({
   onAnimationComplete,
-  logoSource = require('../vertical-logo.png'),
+  logoSource = require('../logo.png'),
   showProgressBar = true,
 }) => {
 
