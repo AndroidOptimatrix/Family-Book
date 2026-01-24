@@ -36,10 +36,10 @@ const GridItem: React.FC<GridItemProps> = ({ item, onPress, flex = false }) => {
           {/* Text Content */}
           <View style={styles.textContainer}>
             <Text style={styles.englishTitle} numberOfLines={1}>
-              {item.title}
+              {item.gujTitle}
             </Text>
             <Text style={styles.gujaratiTitle} numberOfLines={1}>
-              {item.gujTitle}
+              {item.title}
             </Text>
           </View>
           

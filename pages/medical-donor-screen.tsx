@@ -95,7 +95,7 @@ const MedicalDonorScreen: React.FC = () => {
                 }
                 showsVerticalScrollIndicator={false}
             >
-                <LinearHeader title='Kaymi Medical Donor' subtitle='મેડિકલ ફંડના દાતા' />
+                <LinearHeader title='કાયમી મેડિકલ ફંડના દાતા' subtitle='Medical Fund Donor' />
 
                 {/* Total Section */}
                 <View style={styles.totalContainer}>
@@ -111,15 +111,11 @@ const MedicalDonorScreen: React.FC = () => {
                 {/* Divider */}
                 <View style={styles.divider} />
 
-                {/* Donors List Header */}
-                <View style={styles.listHeader}>
-                    <Text style={styles.listTitle}>Recent Donors</Text>
-                </View>
-
                 {/* Donors List */}
                 <View style={styles.donorsList}>
                     {donors?.map((donor) => (
                         <View key={donor.id} style={styles.donorCard}>
+                            {/* Profile Image */}
                             <TouchableOpacity
                                 activeOpacity={0.7}
                                 onPress={() => donor.photo && handleImagePress(donor.photo)}
@@ -130,19 +126,23 @@ const MedicalDonorScreen: React.FC = () => {
                                 />
                             </TouchableOpacity>
 
+                            {/* Center: Donor Name */}
                             <View style={styles.donorInfo}>
-                                <View style={styles.donorHeader}>
-                                    <Text style={styles.donorName}>{donor.name}</Text>
+                                <View style={styles.donorNameContainer}>
+                                    <Text style={styles.donorName} numberOfLines={2}>
+                                        {donor.name}
+                                    </Text>
                                 </View>
+                            </View>
 
-                                <View style={styles.donationDetails}>
-                                    <View style={styles.amountContainer}>
-                                        <Text style={styles.amountText}>
-                                            {formatCurrency(donor.amount)}
-                                        </Text>
-                                    </View>
-                                    <Text style={styles.dateText}>{formatDate(donor.date)}</Text>
-                                </View>
+                            {/* Right: Amount & Date */}
+                            <View style={styles.rightContainer}>
+                                <Text style={styles.amountText}>
+                                    {formatCurrency(donor.amount)}
+                                </Text>
+                                <Text style={styles.dateText}>
+                                    {formatDate(donor.date)}
+                                </Text>
                             </View>
                         </View>
                     ))}
@@ -224,12 +224,6 @@ const styles = StyleSheet.create({
     donorsList: {
         paddingHorizontal: 20,
     },
-    donorCard: {
-        flexDirection: 'row',
-        paddingVertical: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: '#F3F4F6',
-    },
     donorAvatar: {
         width: 50,
         height: 50,
@@ -239,17 +233,42 @@ const styles = StyleSheet.create({
     donorInfo: {
         flex: 1,
         marginLeft: 12,
-        justifyContent: 'center',
     },
-    donorHeader: {
+    donorCard: {
         flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: '#F3F4F6',
+        minHeight: 60,
+    },
+    donorNameContainer: {
+        flex: 2,
+        justifyContent: 'center',
+        minHeight: 40,
     },
     donorName: {
-        fontSize: 16,
+        fontSize: 18,
         fontWeight: '600',
         color: '#1F2937',
+        lineHeight: 20,
+    },
+    rightContainer: {
+        alignItems: 'flex-end',
+        justifyContent: 'center',
+        marginLeft: 8,
+        flex: 1,
+    },
+    amountText: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        color: '#4F46E5',
+        marginBottom: 2,
+    },
+    dateText: {
+        fontSize: 12,
+        color: '#6B7280',
+        fontStyle: 'italic',
     },
     statusBadge: {
         paddingHorizontal: 8,
@@ -271,26 +290,6 @@ const styles = StyleSheet.create({
     },
     inactiveText: {
         color: '#991B1B',
-    },
-    donationDetails: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginTop: 4,
-    },
-    amountContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    amountText: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: '#4F46E5',
-        marginLeft: 4,
-    },
-    dateText: {
-        fontSize: 13,
-        color: '#6B7280',
     },
 });
 

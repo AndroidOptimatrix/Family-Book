@@ -311,7 +311,7 @@ const NotificationScreen: React.FC = () => {
 
     return (
         <SafeAreaView style={styles.container}>
-            <LinearHeader title='Notifications' subtitle={`${localNotifications.length} notifications`} />
+            <LinearHeader title='તાજેતરની માહિતીઓ' subtitle={`Latest Update`} />
 
             {loading && !refreshing && localNotifications.length === 0 ? (
                 <View style={styles.loadingContainer}>
@@ -377,7 +377,7 @@ const styles = StyleSheet.create({
     notificationCard: {
         backgroundColor: '#FFFFFF',
         borderRadius: 12,
-        marginBottom: 12,
+        marginBottom: 27,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.05,
