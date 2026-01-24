@@ -183,7 +183,7 @@ const DashboardScreen: React.FC = () => {
     {
       id: '1',
       title: 'Latest Updates',
-      gujTitle: 'તાજેતરની સુચનાઓ',
+      gujTitle: 'તાજેતરની માહિતીઓ',
       icon: Bell,
       gradient: BLUE_50,
       screen: 'Notifications',
@@ -192,7 +192,7 @@ const DashboardScreen: React.FC = () => {
     {
       id: '4',
       title: 'Medical Fund Donor',
-      gujTitle: 'મેડિકલ ફંડના દાતા',
+      gujTitle: 'કાયમી મેડિકલ ફંડના દાતા',
       icon: PlusCircle,
       gradient: BLUE_50,
       screen: 'MedicalDonor',
