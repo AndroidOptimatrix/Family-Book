@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "841393732050",
+    "project_id": "react-native-fe332",
+    "storage_bucket": "react-native-fe332.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:841393732050:android:638ae6ce6689282a63300b",
+        "android_client_info": {
+          "package_name": "com.familybook"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBuuFnTp3VWrDQ2xd8kEMzMKYjwW9Ui8pQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

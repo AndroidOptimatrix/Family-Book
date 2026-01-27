@@ -110,7 +110,11 @@ const AppContent: React.FC = () => {
 };
 
 // Main App component with AuthProvider
+import { useFCM } from './hooks/useFCM';
+
 const App: React.FC = () => {
+  useFCM(); // Initialize FCM
+
   const handleLoginSuccess = (userInfo: any) => {
     console.log('✅ User logged in:', userInfo);
   };
