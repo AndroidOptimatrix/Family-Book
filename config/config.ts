@@ -6,3 +6,6 @@ export const AppThemeGradient = [
   '#E4DEF5',
   '#DDE6F6',
 ];
+
+
+export const BASEURL = 'https://www.project.optiinfo.com/familybook';

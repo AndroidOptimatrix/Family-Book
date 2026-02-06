@@ -3,6 +3,6 @@ export interface MedicalDonor {
     name: string;
     amount: string;
     date: string;
-    photo: string;
+    image: string;
     status: string;
 }

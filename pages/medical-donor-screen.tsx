@@ -13,6 +13,7 @@ import {
 import useMedicalDonors from '../hooks/useMedicalDonors';
 import LinearHeader from '../components/common/header';
 import ImageViewerModal from '../components/common/image-viewer-modal';
+import { BASEURL } from '../config/config';
 
 const MedicalDonorScreen: React.FC = () => {
     const { donors, loading, error } = useMedicalDonors();
@@ -87,6 +88,11 @@ const MedicalDonorScreen: React.FC = () => {
         );
     }
 
+    // DEBUG LOGS FOR IMAGES
+    // donors?.map((don => {
+    //     console.log("Donor image", `${BASEURL}/uploads/medical_donor/${don.image}`);
+    // }))
+
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView
@@ -118,10 +124,10 @@ const MedicalDonorScreen: React.FC = () => {
                             {/* Profile Image */}
                             <TouchableOpacity
                                 activeOpacity={0.7}
-                                onPress={() => donor.photo && handleImagePress(donor.photo)}
+                                onPress={() => donor.image && handleImagePress(`${BASEURL}/uploads/medical_donor/${donor.image}`)}
                             >
                                 <Image
-                                    source={{ uri: donor.photo }}
+                                    source={{ uri: `${BASEURL}/uploads/medical_donor/${donor.image}` }}
                                     style={styles.donorAvatar}
                                 />
                             </TouchableOpacity>

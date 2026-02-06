@@ -2,6 +2,9 @@ import { storage } from '../utils/storage';
 import { ApiResponse } from '../types/api.types';
 import { makeApiCall } from '../utils/http-helper';
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
+import { getStoredFCMToken, setStoredUserId, getStoredUserId } from '../utils/storage';
+import { Platform } from 'react-native';
+import { removeItem } from '../utils/storage';
 
 interface UserInfo {
     id: string;
@@ -53,6 +56,50 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     const [userId, setUserId] = useState<string | null>(null);
     const [userPhone, setUserPhone] = useState<string | null>(null);
 
+    // Background function to update device token
+    const updateDeviceTokenInBackground = async (userId: string): Promise<boolean> => {
+        try {
+            console.log('🔄 Background: Updating device token for user:', userId);
+
+            // Get stored FCM token
+            const deviceToken = await getStoredFCMToken();
+
+            if (!deviceToken) {
+                console.log('📭 No FCM token found in storage');
+                return false;
+            }
+
+            console.log('📱 Background: Found FCM token:', deviceToken.substring(0, 30) + '...');
+
+            // Send update request in background
+            const params = {
+                type: 'update_device_token',
+                user_id: userId,
+                device_token: deviceToken,
+                platform: Platform.OS
+            };
+
+            console.log('📤 Background: Sending token to backend...');
+            const data = await makeApiCall('', params);
+
+            if (data.DATA && data.DATA.length > 0) {
+                const firstItem = data.DATA[0];
+                if (firstItem.result === 'success') {
+                    console.log('✅ Background: Device token updated successfully');
+                    return true;
+                } else {
+                    console.error('❌ Background: Failed to update device token:', firstItem.msg);
+                    return false;
+                }
+            }
+
+            return false;
+        } catch (error) {
+            console.error('🔥 Background: Error updating device token:', error);
+            return false;
+        }
+    };
+
     // Check auth status on app start
     useEffect(() => {
         const checkAuthStatus = async () => {
@@ -60,7 +107,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
                 const token = await storage.getItem('@authenticated');
                 const storedUserInfo = await storage.getItem('@user_info');
                 const modelOpen = await storage.getItem('@model_open');
+                const storedUserId = await getStoredUserId(); // Get stored user ID
 
+                if (storedUserId) {
+                    setUserId(storedUserId);
+                }
 
                 if (token) {
                     setIsAuthenticated(true);
@@ -73,7 +124,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
                     }
 
                     // If model_open is true, user needs to complete registration
-                    // Handle both boolean true and string "true" from storage
                     const needsRegistration = modelOpen === true || modelOpen === "true";
                     if (needsRegistration) {
                         setRequiresRegistration(true);
@@ -88,6 +138,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
                     } else if (modelOpen === false || modelOpen === "false") {
                         // User is already registered, perform background login
                         await performBackgroundLogin();
+
+                        // Also update device token in background for existing users
+                        if (storedUserId) {
+                            setTimeout(() => {
+                                updateDeviceTokenInBackground(storedUserId);
+                            }, 2000);
+                        }
                     }
                 } else {
                     setIsAuthenticated(false);
@@ -120,7 +177,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
             const params = {
                 type: 'login_otp',
                 user_id: parsedInfo.user_id || parsedInfo.id,
-                otp_code: parsedInfo.otp, // API expects otp_code parameter
+                otp_code: parsedInfo.otp,
             };
 
             const data = await makeApiCall('', params);
@@ -136,7 +193,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         }
     };
 
-    // Send OTP function
+    // Send OTP function - Updated to store user ID
     const sendOtp = async (mobile: string, country_code: string): Promise<ApiResponse> => {
         try {
             setIsLoading(true);
@@ -164,12 +221,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
             const firstItem = data.DATA[0];
 
             if (firstItem.user_id) {
-                setUserId(firstItem.user_id.toString());
+                const userIdStr = firstItem.user_id.toString();
+                setUserId(userIdStr);
+                // Store user ID for FCM updates
+                await setStoredUserId(userIdStr);
                 const isRegister = firstItem.register === true;
                 await storage.setItem('@model_open', isRegister);
             }
 
-            // Ensure requiresRegistration is false at this point - modal should not open yet
+            // Ensure requiresRegistration is false at this point
             setRequiresRegistration(false);
 
             // Check if successful
@@ -188,8 +248,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         }
     };
 
-    // Verify OTP function
-    // In your verifyOtp function in auth-context.tsx:
+    // Verify OTP function - Updated to trigger FCM token update
     const verifyOtp = async (mobile: string, otp: string, isRegistering?: boolean): Promise<ApiResponse> => {
         try {
             setIsLoading(true);
@@ -229,21 +288,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
 
                     setIsAuthenticated(true);
 
-                    // NOW check if user needs to complete registration (after OTP verification)
-                    // This is when the modal should open, NOT after sending OTP
-                    // Handle both boolean true and string "true" from storage
+                    // Trigger FCM token update in background
+                    setTimeout(async () => {
+                        try {
+                            const updated = await updateDeviceTokenInBackground(userId);
+                            console.log('📱 FCM token update after OTP:', updated ? 'Success' : 'Failed');
+                        } catch (error) {
+                            console.error('FCM token update error:', error);
+                        }
+                    }, 1000);
+
+                    // Check if user needs to complete registration
                     const needsRegistration = modelOpen === true || modelOpen === "true";
                     if (needsRegistration) {
-                        setUserPhone(mobile); // Set phone number for modal display
-                        setRequiresRegistration(true); // This will trigger the modal to open
+                        setUserPhone(mobile);
+                        setRequiresRegistration(true);
 
-                        // IMPORTANT: Call the callback to notify parent component
                         if (onRegistrationRequired) {
                             onRegistrationRequired(mobile);
                         }
                     } else {
                         console.log('✅ User is already registered, performing login...');
-                        // User is already registered, perform login directly (no modal needed)
                         await performLoginAfterOtp(userId, otp);
                     }
 
@@ -306,8 +371,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         }
     };
 
-    // Complete profile function
-    // Flow: 1. Send complete_registration request 2. Then perform background login_otp
+    // Complete profile function - Updated to trigger FCM token update
     const completeProfile = async (name: string): Promise<ApiResponse> => {
         try {
             setIsLoading(true);
@@ -321,7 +385,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
             let mobileNumber = userPhone || '';
             if (mobileNumber) {
                 mobileNumber = mobileNumber.replace(/\D/g, '');
-                // Remove country code if present (e.g., "918141561118" -> "8141561118")
                 if (mobileNumber.length > 10 && mobileNumber.startsWith('91')) {
                     mobileNumber = mobileNumber.substring(2);
                 }
@@ -343,7 +406,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
                 if (firstItem.result === 'success') {
                     console.log('🎉 Profile completed successfully');
 
-                    // Step 2: Now perform background login after profile completion
+                    // Trigger FCM token update after profile completion
+                    setTimeout(async () => {
+                        try {
+                            const updated = await updateDeviceTokenInBackground(userId);
+                            console.log('📱 FCM token update after profile:', updated ? 'Success' : 'Failed');
+                        } catch (error) {
+                            console.error('FCM token update error:', error);
+                        }
+                    }, 1000);
+
+                    // Step 2: Perform background login
                     await performLoginAfterProfile(userId);
 
                     return data;
@@ -363,7 +436,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     };
 
     // Perform background login after profile completion
-    // This is Step 2: Send login_otp request in background
     const performLoginAfterProfile = async (userId: string): Promise<void> => {
         try {
             // Get stored OTP from user info
@@ -381,7 +453,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
             const params = {
                 type: 'login_otp',
                 user_id: userId,
-                otp_code: parsedInfo.otp, // API expects otp_code parameter
+                otp_code: parsedInfo.otp,
             };
 
             const data = await makeApiCall('', params);
@@ -416,18 +488,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         }
     };
 
-    // Clear registration requirement (manual override)
+    // Clear registration requirement
     const clearRegistrationRequirement = (): void => {
         setRequiresRegistration(false);
         storage.setItem('@model_open', false);
     };
 
-    // Logout function
+    // Logout function - Updated to clear user ID but keep FCM token
     const logout = async (): Promise<void> => {
         try {
             await storage.removeItem('@authenticated');
             await storage.removeItem('@user_info');
             await storage.removeItem('@model_open');
+
+            await removeItem('@user_id' as any);
 
             setUserId(null);
             setUserPhone(null);
@@ -435,14 +509,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
             setRequiresRegistration(false);
             setIsAuthenticated(false);
 
-            console.log('👋 User logged out successfully');
+            console.log('👋 User logged out successfully (FCM token preserved)');
         } catch (error) {
             console.error('Logout error:', error);
             throw error;
         }
     };
 
-    // updaete user info in state
+    // Update user info
     const updateUserInfo = async (updatedInfo: Partial<UserInfo>): Promise<void> => {
         try {
             if (!userInfo) {

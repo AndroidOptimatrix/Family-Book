@@ -114,6 +114,7 @@ const NotificationScreen: React.FC = () => {
 
     // Component for image with dynamic height
     const DynamicImage = ({ uri }: { uri: string }) => {
+        console.log("image got in notificaotin", uri);
         const dimensions = useImageDimensions(uri);
 
         if (!dimensions) {
