@@ -2,7 +2,8 @@ import { storage } from '../utils/storage';
 import { ApiResponse } from '../types/api.types';
 import { makeApiCall } from '../utils/http-helper';
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
-import { getStoredFCMToken, setStoredUserId, getStoredUserId } from '../utils/storage';
+import { setStoredUserId, getStoredUserId } from '../utils/storage';
+import { syncFCMToken } from '../utils/fcm-helper';
 import { Platform } from 'react-native';
 import { removeItem } from '../utils/storage';
 
@@ -56,49 +57,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     const [userId, setUserId] = useState<string | null>(null);
     const [userPhone, setUserPhone] = useState<string | null>(null);
 
-    // Background function to update device token
-    const updateDeviceTokenInBackground = async (userId: string): Promise<boolean> => {
-        try {
-            console.log('🔄 Background: Updating device token for user:', userId);
 
-            // Get stored FCM token
-            const deviceToken = await getStoredFCMToken();
-
-            if (!deviceToken) {
-                console.log('📭 No FCM token found in storage');
-                return false;
-            }
-
-            console.log('📱 Background: Found FCM token:', deviceToken.substring(0, 30) + '...');
-
-            // Send update request in background
-            const params = {
-                type: 'update_device_token',
-                user_id: userId,
-                device_token: deviceToken,
-                platform: Platform.OS
-            };
-
-            console.log('📤 Background: Sending token to backend...');
-            const data = await makeApiCall('', params);
-
-            if (data.DATA && data.DATA.length > 0) {
-                const firstItem = data.DATA[0];
-                if (firstItem.result === 'success') {
-                    console.log('✅ Background: Device token updated successfully');
-                    return true;
-                } else {
-                    console.error('❌ Background: Failed to update device token:', firstItem.msg);
-                    return false;
-                }
-            }
-
-            return false;
-        } catch (error) {
-            console.error('🔥 Background: Error updating device token:', error);
-            return false;
-        }
-    };
 
     // Check auth status on app start
     useEffect(() => {
@@ -142,7 +101,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
                         // Also update device token in background for existing users
                         if (storedUserId) {
                             setTimeout(() => {
-                                updateDeviceTokenInBackground(storedUserId);
+                                syncFCMToken(storedUserId);
                             }, 2000);
                         }
                     }
@@ -291,7 +250,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
                     // Trigger FCM token update in background
                     setTimeout(async () => {
                         try {
-                            const updated = await updateDeviceTokenInBackground(userId);
+                            const updated = await syncFCMToken(userId);
                             console.log('📱 FCM token update after OTP:', updated ? 'Success' : 'Failed');
                         } catch (error) {
                             console.error('FCM token update error:', error);
@@ -409,7 +368,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
                     // Trigger FCM token update after profile completion
                     setTimeout(async () => {
                         try {
-                            const updated = await updateDeviceTokenInBackground(userId);
+                            const updated = await syncFCMToken(userId);
                             console.log('📱 FCM token update after profile:', updated ? 'Success' : 'Failed');
                         } catch (error) {
                             console.error('FCM token update error:', error);

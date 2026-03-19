@@ -34,7 +34,6 @@ import Header from '../components/dashboard/header';
 import GridItem from '../components/dashboard/grid-items';
 import AdCarousel from '../components/dashboard/ad-carousel';
 import PlatformCard from '../components/dashboard/plateform-card';
-import EventCard from '../components/dashboard/event-card';
 import ComingSoonModal from '../components/common/coming-soon';
 
 import { MenuItem, GridItem as GridItemType, Platform, Event } from '../types/dashboard.types';
@@ -176,6 +175,13 @@ const DashboardScreen: React.FC = () => {
       icon: PlusCircle,
       gradient: PURPLE_50,
       screen: 'MedicalDonor',
+    },
+    {
+      id: '9',
+      title: 'Medical Fund Help',
+      icon: PlusCircle,
+      gradient: PURPLE_50,
+      screen: 'MedicalHelp',
     },
   ];
 
@@ -408,7 +414,7 @@ const DashboardScreen: React.FC = () => {
           </View>
 
           {/* Events Section */}
-          <View style={styles.section}>
+          {/* <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Today's Celebration</Text>
               <TouchableOpacity onPress={() => navigation.navigate('Events')}>
@@ -420,7 +426,7 @@ const DashboardScreen: React.FC = () => {
                 <EventCard key={event.id} event={event} />
               ))}
             </View>
-          </View>
+          </View> */}
 
           <View style={styles.bottomSpacing} />
         </ScrollView>
